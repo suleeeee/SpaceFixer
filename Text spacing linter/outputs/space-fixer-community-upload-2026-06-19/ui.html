@@ -1,0 +1,2857 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SpaceFixer</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: var(--figma-color-bg);
+        --fg: var(--figma-color-text);
+        --muted: var(--figma-color-text-secondary);
+        --border: var(--figma-color-border);
+        --panel: var(--figma-color-bg-secondary);
+        --brand: var(--figma-color-bg-brand);
+        --brand-fg: var(--figma-color-text-onbrand);
+        --danger: var(--figma-color-text-danger);
+        --hover: var(--figma-color-bg-hover);
+        --vivo-blue: #415fff;
+        --success: #2cac76;
+        --warning: #f2a133;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 12px/1.5 Helvetica, "Helvetica Neue", "Noto Sans SC", sans-serif;
+      }
+
+      body.modal-open {
+        overflow: hidden;
+      }
+
+      button,
+      textarea,
+      select {
+        font: inherit;
+      }
+
+      .app {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+      }
+
+      header {
+        padding: 16px 16px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      h1 {
+        margin: 0 0 4px;
+        font-size: 14px;
+        line-height: 20px;
+      }
+
+      .brand-title {
+        display: block;
+        width: 74px;
+        height: 14px;
+        margin: 0 0 5px;
+        color: var(--fg);
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      main {
+        display: flex;
+        min-height: 0;
+        flex: 1;
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 16px 16px;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: minmax(112px, 1fr) auto auto;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .scan-options {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 24px;
+        color: var(--muted);
+      }
+
+      .scan-option-groups {
+        display: grid;
+        gap: 6px;
+      }
+
+      .scan-option-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 24px;
+      }
+
+      .scan-option-group .scan-options {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .scan-option-heading {
+        width: 58px;
+        flex: 0 0 58px;
+        color: var(--tertiary);
+        font-size: 11px;
+        line-height: 16px;
+      }
+
+      .scan-options label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 24px;
+        cursor: pointer;
+        line-height: 16px;
+      }
+
+      .scan-options input {
+        width: 14px;
+        height: 14px;
+        align-self: center;
+        margin: 0;
+      }
+
+      .scan-option-label {
+        line-height: 16px;
+        white-space: nowrap;
+      }
+
+      .optional-scan-option {
+        color: var(--muted);
+      }
+
+      .settings-trigger {
+        display: grid;
+        width: 28px;
+        height: 28px;
+        flex: none;
+        place-items: center;
+        border-color: transparent;
+        background: transparent;
+        color: var(--muted);
+        padding: 0;
+      }
+
+      .settings-trigger svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.75;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .settings-trigger:hover {
+        border-color: transparent;
+        background: var(--panel-hover);
+        color: var(--fg);
+      }
+
+      .script-rule-note {
+        color: var(--tertiary);
+        font-size: 11px;
+        line-height: 16px;
+        padding: 0 2px;
+      }
+
+      .extra-space-warning {
+        border-radius: 6px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 16px;
+        padding: 6px 8px;
+      }
+
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--panel);
+        color: var(--fg);
+        outline: none;
+      }
+
+      select {
+        height: 32px;
+        appearance: none;
+        padding: 0 38px 0 10px;
+        background-image:
+          linear-gradient(45deg, transparent 50%, currentColor 50%),
+          linear-gradient(135deg, currentColor 50%, transparent 50%);
+        background-position:
+          calc(100% - 16px) 13px,
+          calc(100% - 11px) 13px;
+        background-repeat: no-repeat;
+        background-size: 5px 5px, 5px 5px;
+      }
+
+      textarea {
+        min-height: 116px;
+        resize: vertical;
+        padding: 8px;
+        line-height: 14px;
+      }
+
+      button {
+        height: 32px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--panel);
+        color: var(--fg);
+        cursor: pointer;
+        padding: 0 10px;
+        white-space: nowrap;
+        transition:
+          background-color 120ms ease,
+          border-color 120ms ease,
+          transform 80ms ease;
+      }
+
+      button:hover {
+        background: var(--hover);
+        border-color: var(--figma-color-border-strong);
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      button:focus-visible {
+        outline: 2px solid var(--brand);
+        outline-offset: 2px;
+      }
+
+      button.primary {
+        border-color: transparent;
+        background: var(--brand);
+        color: var(--brand-fg);
+      }
+
+      button.primary:hover {
+        border-color: transparent;
+        background: var(--figma-color-bg-brand-hover);
+      }
+
+      button.primary:active {
+        background: var(--figma-color-bg-brand-pressed);
+      }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 24px;
+      }
+
+      .section-title strong {
+        font-size: 12px;
+      }
+
+      .count {
+        color: var(--muted);
+      }
+
+      .results-section {
+        display: flex;
+        min-height: 0;
+        flex: 1;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .result-status {
+        display: flex;
+        min-height: 34px;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        background: var(--panel);
+        color: var(--muted);
+        padding: 7px 10px;
+      }
+
+      .result-status.is-success {
+        min-height: 20px;
+        border-color: transparent;
+        background: transparent;
+        color: var(--success);
+        font-size: 11px;
+        padding: 0;
+      }
+
+      .result-status.is-warning {
+        border-color: var(--warning);
+        color: var(--warning);
+      }
+
+      .result-status.is-failure {
+        border-color: var(--figma-color-border-danger);
+        color: var(--danger);
+      }
+
+      .issue-filters {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+      }
+
+      .issue-filter {
+        height: 28px;
+        border-radius: 14px;
+        color: var(--muted);
+        padding: 0 10px;
+      }
+
+      .issue-filter.is-selected {
+        border-color: var(--brand);
+        background: rgba(13, 153, 255, 0.14);
+        color: var(--fg);
+      }
+
+      .issue-filter-rule {
+        color: inherit;
+        font-size: 9px;
+      }
+
+      .status-spinner {
+        width: 12px;
+        height: 12px;
+        flex: none;
+        border: 2px solid var(--border);
+        border-top-color: var(--brand);
+        border-radius: 50%;
+        animation: spin 720ms linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .issues {
+        display: flex;
+        min-height: 180px;
+        flex: 1;
+        flex-direction: column;
+        gap: 8px;
+        overflow: auto;
+        padding-right: 2px;
+        transition: opacity 120ms ease;
+      }
+
+      .extra-space-warning:not([hidden]) + .results-section .issues {
+        min-height: 96px;
+      }
+
+      .issues.is-stale {
+        opacity: 0.58;
+      }
+
+      .issue {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        overflow: hidden;
+      }
+
+      .issue-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 34px;
+        border-bottom: 1px solid var(--border);
+        padding: 7px 10px;
+      }
+
+      .node {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        font-weight: 600;
+      }
+
+      .node-page,
+      .node-separator {
+        flex: none;
+        color: #7f7a7a;
+        font-weight: 400;
+      }
+
+      .node-layer {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .group-count {
+        flex: none;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 400;
+        white-space: nowrap;
+      }
+
+      .issue-row {
+        display: flex;
+        min-height: 48px;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 10px;
+      }
+
+      .issue-row + .issue-row {
+        border-top: 1px solid var(--border);
+      }
+
+      .issue-row:hover {
+        background: var(--hover);
+      }
+
+      .issue-copy {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .issue-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 2px;
+      }
+
+      .issue-kind {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .pair {
+        color: var(--fg);
+        font-weight: 600;
+        white-space: pre;
+        word-break: keep-all;
+      }
+
+      .difference-arrow {
+        color: var(--muted);
+        font-weight: 400;
+      }
+
+      .difference-after {
+        color: var(--vivo-blue);
+      }
+
+      .excerpt {
+        overflow: hidden;
+        color: var(--fg);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .issue-actions {
+        display: flex;
+        flex: none;
+        gap: 6px;
+      }
+
+      .issue-actions button {
+        height: 28px;
+        padding: 0 9px;
+      }
+
+      .issue-action-locate {
+        border-color: transparent;
+        background: transparent;
+        color: var(--muted);
+      }
+
+      .issue-action-fix {
+        border-color: var(--brand);
+        color: var(--brand);
+      }
+
+      .preview-note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .preview-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .danger {
+        border-color: var(--figma-color-border-danger, #e03e3e);
+        background: var(--figma-color-bg-danger, #e03e3e);
+        color: var(--figma-color-text-onbrand, #ffffff);
+      }
+
+      .danger:hover {
+        border-color: var(--figma-color-border-danger-strong, #f05a5a);
+        background: var(--figma-color-bg-danger-hover, #c93434);
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        z-index: 10;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.56);
+        overscroll-behavior: contain;
+        padding: 16px;
+      }
+
+      .modal {
+        display: flex;
+        width: 100%;
+        max-width: 388px;
+        max-height: calc(100vh - 32px);
+        min-width: 0;
+        flex-direction: column;
+        flex-shrink: 0;
+        gap: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg, #2c2c2c);
+        overflow: hidden;
+        overscroll-behavior: contain;
+        padding: 14px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.32);
+      }
+
+      #allPreviewOverlay {
+        align-items: center;
+        overflow: hidden;
+      }
+
+      .preview-modal {
+        max-height: calc(100vh - 32px);
+        overflow-y: auto;
+      }
+
+      .preview-modal > h2,
+      .preview-modal > p,
+      .preview-modal > .summary-grid,
+      .preview-modal > .preview-actions {
+        flex: none;
+      }
+
+      .modal h2 {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .confirm-description {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .settings-modal {
+        max-width: 360px;
+      }
+
+      .settings-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .settings-sections {
+        display: grid;
+        max-height: calc(100vh - 122px);
+        min-height: 0;
+        align-content: start;
+        grid-auto-rows: max-content;
+        gap: 8px;
+        overflow-y: auto;
+        padding-right: 2px;
+      }
+
+      .settings-section {
+        display: grid;
+        gap: 6px;
+        align-content: start;
+        border-radius: 12px;
+        background: var(--panel-secondary);
+        padding: 10px 12px;
+      }
+
+      .settings-section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 4px;
+      }
+
+      .settings-section-head strong {
+        font-size: 12px;
+        line-height: 16px;
+      }
+
+      .settings-reset {
+        min-height: 24px;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: var(--brand);
+        font-size: 11px;
+        box-shadow: none;
+      }
+
+      .settings-reset:hover:not(:disabled) {
+        background: transparent;
+        color: var(--brand-hover);
+      }
+
+      .settings-divider {
+        height: 1px;
+        margin: 4px 2px;
+        background: var(--border);
+      }
+
+      .settings-note {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 14px;
+      }
+
+      .settings-note strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .settings-options-inline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px 16px;
+      }
+
+      .settings-option {
+        display: flex;
+        min-height: 24px;
+        align-items: center;
+        gap: 7px;
+        color: var(--fg);
+        cursor: pointer;
+      }
+
+      .settings-option input {
+        width: 15px;
+        height: 15px;
+        flex: none;
+        margin: 0;
+        accent-color: var(--brand);
+      }
+
+      .settings-option span {
+        line-height: 16px;
+      }
+
+      .settings-option.is-disabled {
+        cursor: default;
+        opacity: 0.45;
+      }
+
+      .summary-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .summary-total {
+        position: relative;
+        display: flex;
+        min-height: 104px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background:
+          linear-gradient(135deg, var(--panel-hover), var(--panel-secondary));
+        overflow: hidden;
+        padding: 16px 18px;
+      }
+
+      .summary-total::after {
+        position: absolute;
+        width: 96px;
+        height: 96px;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        content: "";
+        opacity: 0.55;
+        right: -38px;
+        top: -46px;
+      }
+
+      .summary-total-copy {
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 16px;
+      }
+
+      .summary-eyebrow {
+        color: var(--tertiary);
+        font-family:
+          "SF Pro Display",
+          "Helvetica Neue",
+          "Avenir Next",
+          sans-serif;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        line-height: 12px;
+        text-transform: uppercase;
+      }
+
+      .summary-total-value {
+        position: relative;
+        z-index: 1;
+        color: var(--fg);
+        font-family:
+          "SF Pro Display",
+          "Helvetica Neue",
+          "Avenir Next",
+          sans-serif;
+        font-feature-settings: "tnum" 1, "ss01" 1;
+        font-size: 44px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        letter-spacing: -0.055em;
+        line-height: 1;
+      }
+
+      .summary-subgrid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .summary-item {
+        display: flex;
+        min-width: 0;
+        min-height: 126px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--panel-secondary);
+        color: var(--muted);
+        padding: 11px;
+        text-align: left;
+      }
+
+      .summary-metric {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        margin-top: 2px;
+      }
+
+      .summary-value {
+        display: block;
+        color: var(--fg);
+        font-family:
+          "SF Pro Display",
+          "Helvetica Neue",
+          "Avenir Next",
+          sans-serif;
+        font-feature-settings: "tnum" 1, "ss01" 1;
+        font-size: 28px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+
+      .summary-label {
+        color: inherit;
+        font-size: 11px;
+        line-height: 15px;
+      }
+
+      .summary-details {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        gap: 3px;
+        margin-top: 7px;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 9px;
+        line-height: 12px;
+        padding-top: 7px;
+      }
+
+      .summary-detail {
+        display: grid;
+        min-width: 0;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: baseline;
+        gap: 4px;
+      }
+
+      .summary-detail-value {
+        color: var(--fg);
+        font-family:
+          "SF Pro Display",
+          "Helvetica Neue",
+          "Avenir Next",
+          sans-serif;
+        font-feature-settings: "tnum" 1;
+        font-size: 10px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+      }
+
+      .summary-detail-label {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .summary-risk {
+        margin-top: auto;
+        border-radius: 6px;
+        background: var(--warning-soft);
+        color: var(--warning);
+        font-size: 9px;
+        line-height: 13px;
+        padding: 5px 6px;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      .empty {
+        display: grid;
+        min-height: 180px;
+        place-items: center;
+        border: 1px dashed var(--border);
+        border-radius: 8px;
+        color: var(--muted);
+        text-align: center;
+        padding: 20px;
+      }
+
+      .whitelist-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      #clearWhitelist {
+        margin-left: auto;
+      }
+
+      .whitelist-toolbar {
+        position: relative;
+        display: block;
+      }
+
+      .whitelist-toolbar select {
+        width: 100%;
+        height: 34px;
+        min-height: 34px;
+        padding-right: 190px;
+        line-height: 20px;
+        background-position:
+          calc(100% - 16px) 14px,
+          calc(100% - 11px) 14px;
+      }
+
+      .whitelist-scope-hint {
+        position: absolute;
+        top: 50%;
+        right: 38px;
+        max-width: 180px;
+        pointer-events: none;
+        transform: translateY(-50%);
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 16px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      #saveStatus {
+        overflow: hidden;
+        min-width: 0;
+        font-size: 12px;
+        line-height: 18px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .whitelist-section {
+        display: flex;
+        flex: none;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .whitelist-toggle {
+        display: flex;
+        width: 100%;
+        height: 34px;
+        align-items: center;
+        justify-content: space-between;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: var(--fg);
+        cursor: pointer;
+        padding: 0;
+        line-height: 16px;
+        outline: none;
+        text-align: left;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        transition: none;
+      }
+
+      .whitelist-toggle:hover {
+        background: transparent;
+      }
+
+      .whitelist-toggle:focus-visible {
+        outline: 2px solid var(--brand);
+        outline-offset: 2px;
+      }
+
+      .whitelist-toggle-copy {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 8px;
+        pointer-events: none;
+      }
+
+      .whitelist-toggle-copy strong {
+        line-height: 16px;
+      }
+
+      .whitelist-summary {
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 16px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .whitelist-chevron {
+        position: relative;
+        width: 24px;
+        height: 24px;
+        flex: none;
+        border-radius: 4px;
+        pointer-events: none;
+      }
+
+      .whitelist-chevron svg {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 14px;
+        height: 14px;
+        display: block;
+        stroke: var(--tertiary);
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transform: translateZ(0);
+      }
+
+      .whitelist-toggle[aria-expanded="false"]:hover .whitelist-chevron {
+        background: var(--panel-secondary);
+      }
+
+      .whitelist-toggle[aria-expanded="true"] .whitelist-chevron svg {
+        transform: rotate(180deg);
+      }
+
+      .whitelist-content {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .save-status {
+        color: var(--muted);
+      }
+
+      button:disabled,
+      textarea:disabled,
+      select:disabled {
+        cursor: default;
+        opacity: 0.48;
+      }
+
+      button:disabled:hover {
+        background: var(--panel);
+        border-color: var(--border);
+      }
+
+      /*
+       * Apple-inspired interface system:
+       * neutral surfaces, restrained semantic color, and depth through spacing.
+       */
+      :root {
+        color-scheme: light dark;
+        --bg: #f5f5f7;
+        --fg: #1d1d1f;
+        --muted: #6e6e73;
+        --tertiary: #8e8e93;
+        --border: rgba(60, 60, 67, 0.18);
+        --border-strong: rgba(60, 60, 67, 0.3);
+        --panel: #ffffff;
+        --panel-secondary: rgba(118, 118, 128, 0.08);
+        --panel-hover: rgba(118, 118, 128, 0.12);
+        --brand: #0071e3;
+        --brand-hover: #0077ed;
+        --brand-pressed: #0068d1;
+        --brand-soft: rgba(0, 113, 227, 0.1);
+        --brand-fg: #ffffff;
+        --danger: #ff3b30;
+        --danger-soft: rgba(255, 59, 48, 0.1);
+        --success: #248a3d;
+        --success-soft: rgba(52, 199, 89, 0.1);
+        --warning: #b25000;
+        --warning-soft: rgba(255, 159, 10, 0.12);
+        --hover: var(--panel-hover);
+        --vivo-blue: var(--brand);
+        --control-radius: 9px;
+        --card-radius: 12px;
+        --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-modal:
+          0 24px 80px rgba(0, 0, 0, 0.2),
+          0 4px 18px rgba(0, 0, 0, 0.08);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1c1c1e;
+          --fg: #f5f5f7;
+          --muted: #aeaeb2;
+          --tertiary: #8e8e93;
+          --border: rgba(84, 84, 88, 0.52);
+          --border-strong: rgba(99, 99, 102, 0.72);
+          --panel: #2c2c2e;
+          --panel-secondary: rgba(118, 118, 128, 0.16);
+          --panel-hover: rgba(118, 118, 128, 0.24);
+          --brand: #0071e3;
+          --brand-hover: #147ce5;
+          --brand-pressed: #0068d1;
+          --brand-soft: rgba(0, 113, 227, 0.14);
+          --danger: #ff453a;
+          --danger-soft: rgba(255, 69, 58, 0.16);
+          --success: #30d158;
+          --success-soft: rgba(48, 209, 88, 0.13);
+          --warning: #ffd60a;
+          --warning-soft: rgba(255, 214, 10, 0.12);
+          --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.18);
+          --shadow-modal:
+            0 30px 90px rgba(0, 0, 0, 0.56),
+            0 4px 20px rgba(0, 0, 0, 0.28);
+        }
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          Helvetica,
+          "Helvetica Neue",
+          "Noto Sans SC",
+          sans-serif;
+        font-size: 12px;
+        letter-spacing: -0.01em;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      header {
+        padding: 18px 18px 15px;
+        border-bottom-color: var(--border);
+        background: var(--bg);
+      }
+
+      h1 {
+        margin-bottom: 3px;
+        font-size: 15px;
+        line-height: 20px;
+      }
+
+      .brand-title {
+        width: 74px;
+        height: 14px;
+        margin-bottom: 5px;
+      }
+
+      header p {
+        font-size: 11px;
+        line-height: 17px;
+      }
+
+      main {
+        gap: 10px;
+        padding: 12px 18px 14px;
+      }
+
+      .toolbar {
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        gap: 8px;
+      }
+
+      select,
+      textarea,
+      button {
+        border-color: var(--border);
+        border-radius: var(--control-radius);
+        background: var(--panel);
+        color: var(--fg);
+        box-shadow: var(--shadow-card);
+      }
+
+      select {
+        height: 34px;
+        padding-left: 12px;
+        background-color: var(--panel);
+        background-image:
+          linear-gradient(45deg, transparent 50%, var(--tertiary) 50%),
+          linear-gradient(135deg, var(--tertiary) 50%, transparent 50%);
+        background-position:
+          calc(100% - 16px) 14px,
+          calc(100% - 11px) 14px;
+        background-repeat: no-repeat;
+        background-size: 5px 5px, 5px 5px;
+      }
+
+      textarea {
+        min-height: 120px;
+        padding: 10px 11px;
+        line-height: 19px;
+      }
+
+      button {
+        height: 34px;
+        padding: 0 12px;
+        font-weight: 500;
+        transition:
+          background-color 140ms ease,
+          border-color 140ms ease,
+          color 140ms ease,
+          opacity 140ms ease,
+          transform 80ms ease;
+      }
+
+      button:hover {
+        border-color: var(--border-strong);
+        background: var(--panel-hover);
+      }
+
+      button.primary {
+        background: var(--brand);
+        color: var(--brand-fg);
+        box-shadow: none;
+      }
+
+      button.primary:hover {
+        background: var(--brand-hover);
+      }
+
+      button.primary:active {
+        background: var(--brand-pressed);
+      }
+
+      button:focus-visible,
+      .whitelist-toggle:focus-visible {
+        outline: 3px solid var(--brand-soft);
+        outline-offset: 1px;
+      }
+
+      button:disabled,
+      textarea:disabled,
+      select:disabled {
+        opacity: 0.4;
+      }
+
+      .scan-options {
+        min-height: 22px;
+        gap: 18px;
+        color: var(--muted);
+      }
+
+      .scan-options label {
+        min-height: 22px;
+        gap: 5px;
+      }
+
+      .scan-options input {
+        width: 15px;
+        height: 15px;
+        accent-color: var(--brand);
+      }
+
+      .optional-scan-option {
+        color: inherit;
+        font-size: inherit;
+      }
+
+      .extra-space-warning {
+        margin-top: -5px;
+        border: 1px solid transparent;
+        border-radius: var(--control-radius);
+        background: var(--warning-soft);
+        color: var(--warning);
+        font-size: 10px;
+        line-height: 14px;
+        padding: 8px 11px;
+      }
+
+      .section-title {
+        min-height: 22px;
+      }
+
+      .section-title strong {
+        font-size: 12px;
+        letter-spacing: -0.01em;
+      }
+
+      .count {
+        color: var(--tertiary);
+      }
+
+      .results-section {
+        gap: 7px;
+      }
+
+      .result-status {
+        min-height: 36px;
+        border-color: transparent;
+        border-radius: var(--control-radius);
+        background: var(--panel-secondary);
+        color: var(--muted);
+        padding: 8px 11px;
+        box-shadow: none;
+      }
+
+      .result-status.is-success {
+        min-height: 30px;
+        border-radius: var(--control-radius);
+        background: var(--success-soft);
+        color: var(--success);
+        padding: 6px 10px;
+      }
+
+      .result-status.is-warning {
+        border-color: transparent;
+        background: var(--warning-soft);
+        color: var(--warning);
+      }
+
+      .result-status.is-failure {
+        border-color: transparent;
+        background: var(--danger-soft);
+        color: var(--danger);
+      }
+
+      .issue-filters {
+        gap: 5px;
+        padding: 1px 0;
+      }
+
+      .issue-filter {
+        height: 28px;
+        border-color: transparent;
+        border-radius: 14px;
+        background: var(--panel-secondary);
+        color: var(--muted);
+        box-shadow: none;
+        padding: 0 11px;
+      }
+
+      .issue-filter:hover {
+        border-color: transparent;
+        background: var(--panel-hover);
+      }
+
+      .issue-filter.is-selected {
+        border-color: transparent;
+        background: var(--panel-hover);
+        color: var(--brand);
+      }
+
+      .issues {
+        gap: 9px;
+        scrollbar-color: var(--border-strong) transparent;
+        scrollbar-width: thin;
+      }
+
+      .issues::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      .issues::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        background: var(--border-strong);
+      }
+
+      .issue {
+        border-color: var(--border);
+        border-radius: var(--card-radius);
+        background: var(--panel);
+        box-shadow: var(--shadow-card);
+      }
+
+      .issue-head {
+        min-height: 36px;
+        border-bottom-color: var(--border);
+        padding: 8px 11px;
+      }
+
+      .node-page,
+      .node-separator,
+      .preview-page,
+      .preview-separator {
+        color: var(--tertiary);
+      }
+
+      .issue-row {
+        min-height: 52px;
+        gap: 9px;
+        padding: 8px 11px;
+      }
+
+      .issue-row + .issue-row {
+        border-top-color: var(--border);
+      }
+
+      .issue-row:hover {
+        background: var(--panel-secondary);
+      }
+
+      .issue-meta {
+        gap: 7px;
+        margin-bottom: 3px;
+      }
+
+      .issue-kind {
+        color: var(--tertiary);
+      }
+
+      .difference-after {
+        color: var(--brand);
+      }
+
+      .issue-actions {
+        gap: 5px;
+      }
+
+      .issue-actions button {
+        height: 30px;
+        border-radius: 8px;
+        padding: 0 10px;
+        box-shadow: none;
+      }
+
+      .issue-action-locate {
+        border-color: transparent;
+        background: transparent;
+        color: var(--muted);
+      }
+
+      .issue-action-locate:hover {
+        border-color: transparent;
+        background: var(--panel-secondary);
+      }
+
+      .issue-action-fix {
+        border-color: transparent;
+        background: var(--panel-secondary);
+        color: var(--brand);
+      }
+
+      .issue-action-fix:hover {
+        border-color: transparent;
+        background: var(--brand);
+        color: var(--brand-fg);
+      }
+
+      .empty {
+        min-height: 168px;
+        border: 0;
+        border-radius: var(--card-radius);
+        background: var(--panel-secondary);
+        color: var(--muted);
+      }
+
+      .whitelist-section {
+        gap: 9px;
+        border-top: 1px solid var(--border);
+        padding-top: 10px;
+      }
+
+      .whitelist-toggle {
+        height: 36px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .whitelist-toggle[aria-expanded="false"]:hover {
+        background: transparent;
+      }
+
+      .whitelist-toggle[aria-expanded="true"],
+      .whitelist-toggle[aria-expanded="true"]:hover {
+        background: transparent;
+      }
+
+      .whitelist-toggle-copy {
+        gap: 7px;
+      }
+
+      .whitelist-summary {
+        color: var(--tertiary);
+      }
+
+      .whitelist-chevron {
+        border-radius: 7px;
+      }
+
+      .whitelist-content {
+        gap: 13px;
+      }
+
+      .modal-backdrop {
+        background: rgba(0, 0, 0, 0.58);
+        padding: 16px;
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+      }
+
+      .modal {
+        gap: 14px;
+        border-color: var(--border);
+        border-radius: 16px;
+        background: var(--panel);
+        padding: 16px;
+        box-shadow: var(--shadow-modal);
+      }
+
+      .modal h2 {
+        font-size: 15px;
+        letter-spacing: -0.02em;
+      }
+
+      .confirm-description {
+        line-height: 1.55;
+      }
+
+      .summary-grid {
+        gap: 8px;
+      }
+
+      .summary-item {
+        border-color: var(--border);
+        border-radius: 12px;
+        background: var(--panel-secondary);
+        box-shadow: none;
+        padding: 11px;
+      }
+
+      .summary-value {
+        font-size: 28px;
+        line-height: 1;
+      }
+
+      .summary-label {
+        line-height: 15px;
+      }
+
+      .summary-total {
+        background:
+          linear-gradient(135deg, var(--panel-hover), var(--panel-secondary));
+      }
+
+      .preview-actions {
+        gap: 7px;
+      }
+
+      #allPreviewOverlay {
+        background: rgba(0, 0, 0, 0.72);
+      }
+
+      .preview-modal {
+        width: min(100%, 360px);
+        border-color: var(--border);
+        background: var(--bg);
+      }
+
+      .preview-modal .summary-total {
+        background: var(--panel-hover);
+      }
+
+      .preview-modal .summary-item {
+        background: var(--panel);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .preview-modal {
+          border-color: rgba(84, 84, 88, 0.72);
+          background: #1c1c1e;
+        }
+
+        .preview-modal .summary-total {
+          border-color: rgba(99, 99, 102, 0.72);
+          background: #48484a;
+        }
+
+        .preview-modal .summary-item {
+          border-color: rgba(84, 84, 88, 0.52);
+          background: #2c2c2e;
+        }
+      }
+
+      .danger {
+        border-color: transparent;
+        background: var(--danger);
+        color: #ffffff;
+        box-shadow: none;
+      }
+
+      .danger:hover {
+        border-color: transparent;
+        background: #e9342b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <svg
+                    class="brand-title"
+                    role="img"
+                    aria-label="SpaceFixer"
+                    focusable="false"
+                    width="74" height="14" viewBox="0 0 74 14" xmlns="http://www.w3.org/2000/svg">
+          <path d="M72.4857 3.03C72.8007 3.03 73.0557 3.075 73.1907 3.105C73.2807 3.12 73.3407 3.165 73.3407 3.255V4.56C73.3407 4.665 73.2807 4.74 73.1607 4.71C72.9207 4.665 72.5757 4.59 72.2757 4.59C71.2107 4.59 70.6557 5.16 70.6557 6.45V8.805C70.6557 8.865 70.6857 8.895 70.7457 8.895H71.4507C71.5407 8.895 71.6007 8.955 71.6007 9.045V10.215C71.6007 10.305 71.5407 10.365 71.4507 10.365H68.2407C68.1507 10.365 68.0907 10.305 68.0907 10.215V9.045C68.0907 8.955 68.1507 8.895 68.2407 8.895H68.8857C68.9457 8.895 68.9757 8.865 68.9757 8.805V4.695C68.9757 4.635 68.9457 4.605 68.8857 4.605H68.2407C68.1507 4.605 68.0907 4.545 68.0907 4.455V3.285C68.0907 3.195 68.1507 3.135 68.2407 3.135H70.5057C70.5957 3.135 70.6557 3.195 70.6557 3.285V4.035H70.6707C70.9707 3.54 71.5557 3.03 72.4857 3.03Z" fill="currentColor"/>
+          <path d="M63.701 2.97C65.186 2.97 66.266 3.735 66.671 4.965C66.836 5.475 66.911 5.97 66.911 7.14C66.911 7.23 66.851 7.29 66.746 7.29H62.291C62.231 7.29 62.201 7.32 62.201 7.38C62.201 7.59 62.246 7.77 62.306 7.935C62.546 8.64 63.116 9.03 63.926 9.03C64.736 9.03 65.261 8.73 65.621 8.34C65.696 8.265 65.771 8.25 65.846 8.31L66.731 9.09C66.806 9.15 66.806 9.225 66.746 9.3C66.131 10.02 65.111 10.53 63.776 10.53C62.246 10.53 61.166 9.78 60.761 8.52C60.611 8.055 60.506 7.5 60.506 6.75C60.506 6 60.596 5.43 60.746 4.965C61.151 3.705 62.261 2.97 63.701 2.97ZM63.716 4.395C63.026 4.395 62.486 4.74 62.291 5.325C62.231 5.505 62.201 5.685 62.201 5.94C62.201 6 62.231 6.03 62.291 6.03H65.126C65.186 6.03 65.216 6 65.216 5.94C65.216 5.685 65.186 5.505 65.126 5.325C64.931 4.74 64.391 4.395 63.716 4.395Z" fill="currentColor"/>
+          <path d="M57.7282 3.135H59.1982C59.2882 3.135 59.3482 3.195 59.3482 3.285V4.455C59.3482 4.545 59.2882 4.605 59.1982 4.605H58.5532C58.4932 4.605 58.4632 4.635 58.4182 4.695L57.1582 6.615L58.6432 8.82C58.6732 8.865 58.7182 8.895 58.7782 8.895H59.3932C59.4832 8.895 59.5432 8.955 59.5432 9.045V10.215C59.5432 10.305 59.4832 10.365 59.3932 10.365H57.9082C57.8032 10.365 57.7432 10.32 57.6682 10.215L56.2282 8.025H56.2132L54.7732 10.215C54.6982 10.32 54.6382 10.365 54.5182 10.365H53.0932C53.0032 10.365 52.9432 10.305 52.9432 10.215V9.045C52.9432 8.955 53.0032 8.895 53.0932 8.895H53.6782C53.7532 8.895 53.7832 8.865 53.8282 8.805L55.2832 6.615L53.9932 4.68C53.9632 4.635 53.9332 4.605 53.8732 4.605H53.2282C53.1382 4.605 53.0782 4.545 53.0782 4.455V3.285C53.0782 3.195 53.1382 3.135 53.2282 3.135H54.7132C54.8182 3.135 54.8932 3.165 54.9682 3.285L56.2132 5.205H56.2282L57.4882 3.285C57.5632 3.18 57.6232 3.135 57.7282 3.135Z" fill="currentColor"/>
+          <path d="M49.5847 0.165001H50.9647C51.0547 0.165001 51.1147 0.225 51.1147 0.315001V1.62C51.1147 1.71 51.0547 1.77 50.9647 1.77H49.5847C49.4947 1.77 49.4347 1.71 49.4347 1.62V0.315001C49.4347 0.225 49.4947 0.165001 49.5847 0.165001ZM48.6997 3.135H50.9647C51.0547 3.135 51.1147 3.195 51.1147 3.285V8.805C51.1147 8.865 51.1447 8.895 51.2047 8.895H51.8497C51.9397 8.895 51.9997 8.955 51.9997 9.045V10.215C51.9997 10.305 51.9397 10.365 51.8497 10.365H48.6997C48.6097 10.365 48.5497 10.305 48.5497 10.215V9.045C48.5497 8.955 48.6097 8.895 48.6997 8.895H49.3447C49.4047 8.895 49.4347 8.865 49.4347 8.805V4.695C49.4347 4.635 49.4047 4.605 49.3447 4.605H48.6997C48.6097 4.605 48.5497 4.545 48.5497 4.455V3.285C48.5497 3.195 48.6097 3.135 48.6997 3.135Z" fill="currentColor"/>
+          <path d="M40.0132 0.165001H47.2732C47.3632 0.165001 47.4232 0.225 47.4232 0.315001V2.715C47.4232 2.805 47.3632 2.865 47.2732 2.865H45.9832C45.8932 2.865 45.8332 2.805 45.8332 2.715V1.815C45.8332 1.755 45.8032 1.725 45.7432 1.725H42.6832C42.6232 1.725 42.5932 1.755 42.5932 1.815V4.44C42.5932 4.5 42.6232 4.53 42.6832 4.53H44.7532C44.8132 4.53 44.8432 4.5 44.8432 4.44V3.9C44.8432 3.81 44.9032 3.75 44.9932 3.75H46.2382C46.3282 3.75 46.3882 3.81 46.3882 3.9V6.72C46.3882 6.81 46.3282 6.87 46.2382 6.87H44.9932C44.9032 6.87 44.8432 6.81 44.8432 6.72V6.18C44.8432 6.12 44.8132 6.09 44.7532 6.09H42.6832C42.6232 6.09 42.5932 6.12 42.5932 6.18V8.805C42.5932 8.865 42.6232 8.895 42.6832 8.895H43.6132C43.7032 8.895 43.7632 8.955 43.7632 9.045V10.215C43.7632 10.305 43.7032 10.365 43.6132 10.365H40.0132C39.9232 10.365 39.8632 10.305 39.8632 10.215V9.045C39.8632 8.955 39.9232 8.895 40.0132 8.895H40.7332C40.7932 8.895 40.8232 8.865 40.8232 8.805V1.725C40.8232 1.665 40.7932 1.635 40.7332 1.635H40.0132C39.9232 1.635 39.8632 1.575 39.8632 1.485V0.315001C39.8632 0.225 39.9232 0.165001 40.0132 0.165001Z" fill="currentColor"/>
+          <path d="M35.4735 2.97C36.9585 2.97 38.0385 3.735 38.4435 4.965C38.6085 5.475 38.6835 5.97 38.6835 7.14C38.6835 7.23 38.6235 7.29 38.5185 7.29H34.0635C34.0035 7.29 33.9735 7.32 33.9735 7.38C33.9735 7.59 34.0185 7.77 34.0785 7.935C34.3185 8.64 34.8885 9.03 35.6985 9.03C36.5085 9.03 37.0335 8.73 37.3935 8.34C37.4685 8.265 37.5435 8.25 37.6185 8.31L38.5035 9.09C38.5785 9.15 38.5785 9.225 38.5185 9.3C37.9035 10.02 36.8835 10.53 35.5485 10.53C34.0185 10.53 32.9385 9.78 32.5335 8.52C32.3835 8.055 32.2785 7.5 32.2785 6.75C32.2785 6 32.3685 5.43 32.5185 4.965C32.9235 3.705 34.0335 2.97 35.4735 2.97ZM35.4885 4.395C34.7985 4.395 34.2585 4.74 34.0635 5.325C34.0035 5.505 33.9735 5.685 33.9735 5.94C33.9735 6 34.0035 6.03 34.0635 6.03H36.8985C36.9585 6.03 36.9885 6 36.9885 5.94C36.9885 5.685 36.9585 5.505 36.8985 5.325C36.7035 4.74 36.1635 4.395 35.4885 4.395Z" fill="currentColor"/>
+          <path d="M28.225 2.97C29.215 2.97 30.115 3.195 30.715 3.54C30.805 3.585 30.835 3.645 30.835 3.735V5.385C30.835 5.475 30.775 5.535 30.685 5.535H29.41C29.32 5.535 29.26 5.475 29.26 5.385V4.725C29.26 4.665 29.245 4.65 29.185 4.62C29.035 4.545 28.645 4.47 28.27 4.47C27.505 4.47 26.995 4.785 26.785 5.415C26.665 5.775 26.635 6.195 26.635 6.75C26.635 7.305 26.665 7.74 26.785 8.1C26.995 8.715 27.505 9.03 28.27 9.03C28.72 9.03 29.035 8.97 29.185 8.895C29.245 8.865 29.26 8.85 29.26 8.79V8.115C29.26 8.025 29.32 7.965 29.41 7.965H30.685C30.775 7.965 30.835 8.025 30.835 8.115V9.78C30.835 9.87 30.805 9.93 30.715 9.975C30.055 10.32 29.215 10.53 28.225 10.53C26.65 10.53 25.57 9.87 25.15 8.58C25 8.13 24.925 7.515 24.925 6.75C24.925 5.985 25 5.415 25.15 4.965C25.57 3.675 26.695 2.97 28.225 2.97Z" fill="currentColor"/>
+          <path d="M19.9255 2.97C22.1305 2.97 22.9255 3.72 22.9255 5.49V8.805C22.9255 8.865 22.9555 8.895 23.0155 8.895H23.6605C23.7505 8.895 23.8105 8.955 23.8105 9.045V10.215C23.8105 10.305 23.7505 10.365 23.6605 10.365H21.5155C21.4255 10.365 21.3655 10.305 21.3655 10.215V9.69H21.3505C21.0055 10.185 20.3455 10.53 19.3405 10.53C18.0355 10.53 16.9255 9.825 16.9255 8.31C16.9255 6.735 18.0355 6 19.8055 6H21.2455C21.3055 6 21.3355 5.97 21.3355 5.91V5.625C21.3355 4.8 21.0205 4.365 19.8505 4.365C19.5955 4.365 19.2655 4.41 19.0705 4.455C19.0105 4.47 18.9955 4.5 18.9955 4.56V5.205C18.9955 5.295 18.9355 5.355 18.8455 5.355H17.5405C17.4505 5.355 17.3905 5.295 17.3905 5.205V3.675C17.3905 3.585 17.4205 3.525 17.5105 3.48C18.1405 3.18 18.9955 2.97 19.9255 2.97ZM21.2455 7.26H20.0755C19.0105 7.26 18.5305 7.575 18.5305 8.25C18.5305 8.85 18.9655 9.165 19.7605 9.165C20.7805 9.165 21.3355 8.76 21.3355 7.935V7.35C21.3355 7.29 21.3055 7.26 21.2455 7.26Z" fill="currentColor"/>
+          <path d="M12.8837 2.97C14.1137 2.97 15.0137 3.555 15.3887 4.71C15.5687 5.265 15.6437 5.775 15.6437 6.75C15.6437 7.725 15.5687 8.235 15.3887 8.79C15.0137 9.945 14.1137 10.53 12.8837 10.53C11.9087 10.53 11.3087 10.17 10.9637 9.675H10.9487V11.505C10.9487 11.565 10.9787 11.595 11.0387 11.595H11.6837C11.7737 11.595 11.8337 11.655 11.8337 11.745V12.915C11.8337 13.005 11.7737 13.065 11.6837 13.065H8.53371C8.44371 13.065 8.38371 13.005 8.38371 12.915V11.745C8.38371 11.655 8.44371 11.595 8.53371 11.595H9.17871C9.23871 11.595 9.26871 11.565 9.26871 11.505V4.695C9.26871 4.635 9.23871 4.605 9.17871 4.605H8.53371C8.44371 4.605 8.38371 4.545 8.38371 4.455V3.285C8.38371 3.195 8.44371 3.135 8.53371 3.135H10.7987C10.8887 3.135 10.9487 3.195 10.9487 3.285V3.825H10.9637C11.3087 3.33 11.9087 2.97 12.8837 2.97ZM12.4487 4.47C11.7587 4.47 11.2937 4.8 11.0987 5.4C10.9937 5.73 10.9487 6.09 10.9487 6.75C10.9487 7.41 10.9937 7.77 11.0987 8.1C11.2937 8.7 11.7587 9.03 12.4487 9.03C13.1237 9.03 13.5887 8.7 13.7837 8.1C13.8887 7.77 13.9337 7.41 13.9337 6.75C13.9337 6.09 13.8887 5.73 13.7837 5.4C13.5887 4.8 13.1237 4.47 12.4487 4.47Z" fill="currentColor"/>
+          <path d="M3.57 0C4.68 0 5.82 0.315001 6.57 0.720001C6.66 0.765 6.675 0.825 6.675 0.9V2.895C6.675 2.985 6.615 3.045 6.525 3.045H5.205C5.115 3.045 5.055 2.985 5.055 2.895V1.98C5.055 1.905 5.04 1.875 4.965 1.845C4.545 1.68 4.08 1.575 3.465 1.575C2.34 1.575 1.8 2.1 1.8 2.895C1.8 3.645 2.235 4.125 3.645 4.32L4.185 4.395C6.15 4.665 7.23 5.655 7.23 7.41C7.23 9.255 5.97 10.53 3.435 10.53C2.19 10.53 1.095 10.26 0.105 9.72C0.0449999 9.69 0 9.63 0 9.54V7.5C0 7.41 0.0600001 7.35 0.15 7.35H1.53C1.62 7.35 1.68 7.41 1.68 7.5V8.505C1.68 8.565 1.71 8.595 1.755 8.61C2.355 8.835 2.91 8.955 3.525 8.955C4.74 8.955 5.445 8.415 5.445 7.485C5.445 6.75 4.995 6.24 3.585 6.045L3.045 5.97C1.08 5.7 0 4.785 0 3C0 1.095 1.335 0 3.57 0Z" fill="currentColor"/>
+          </svg>
+        <p>检查中文、英文、数字与标点之间的空格问题，并按中文排版规则修正。</p>
+      </header>
+
+      <main>
+        <div class="toolbar">
+          <select id="scope" title="扫描范围">
+            <option value="page">当前页面</option>
+            <option value="document">整个文件</option>
+            <option value="selection">选中内容</option>
+          </select>
+          <button id="scan" class="primary">检查</button>
+          <button id="fixAll" title="修复本次检查的全部问题，不受结果筛选影响" disabled>全部修复</button>
+        </div>
+        <div class="scan-option-groups">
+          <div class="scan-option-group">
+            <span class="scan-option-heading">修正规则</span>
+            <div class="scan-options">
+              <label>
+                <input id="addMissingSpaces" type="checkbox" checked />
+                <span class="scan-option-label">补充缺失空格</span>
+              </label>
+              <label class="optional-scan-option" title="可选的严格空格清理规则">
+                <input
+                  id="removeExtraSpaces"
+                  type="checkbox"
+                  aria-describedby="extraSpaceWarning"
+                />
+                <span class="scan-option-label">清理多余空格*</span>
+              </label>
+            </div>
+            <button
+              id="openSettings"
+              class="settings-trigger"
+              type="button"
+              title="打开规则设置"
+              aria-label="规则设置"
+            >
+              <!-- Lucide Settings icon -->
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div id="extraSpaceWarning" class="extra-space-warning" role="note" hidden>
+          * 可能会删除刻意保留的空格，建议逐条点击修复。
+        </div>
+
+        <section class="results-section">
+          <div class="section-title">
+            <strong>检查结果</strong>
+            <span id="count" class="count">0 处</span>
+          </div>
+          <div id="resultStatus" class="result-status" role="status" aria-live="polite">
+            <span id="resultStatusText">等待检查</span>
+          </div>
+          <div id="issueFilters" class="issue-filters" role="group" aria-label="问题类型筛选" hidden>
+            <button class="issue-filter is-selected" type="button" data-filter="all">全部 0</button>
+            <button class="issue-filter" type="button" data-filter="missing-space">缺少空格 0</button>
+            <button class="issue-filter" type="button" data-filter="extra-space">多余空格 0</button>
+            <button class="issue-filter" type="button" data-filter="term-format">
+              术语格式 0
+            </button>
+          </div>
+          <div id="issues" class="issues">
+            <div class="empty">点击“检查”开始扫描。</div>
+          </div>
+        </section>
+
+        <section class="whitelist-section">
+          <button
+            id="whitelistToggle"
+            class="whitelist-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="whitelistContent"
+          >
+            <span class="whitelist-toggle-copy">
+              <strong>术语规则（白名单）</strong>
+              <span id="whitelistSummary" class="whitelist-summary">文件 0 条 · 个人 0 条</span>
+            </span>
+            <span class="whitelist-chevron" aria-hidden="true">
+              <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+                <path d="M2.5 4.75L6 8.25L9.5 4.75"></path>
+              </svg>
+            </span>
+          </button>
+          <div id="whitelistContent" class="whitelist-content" hidden>
+            <div class="whitelist-toolbar">
+              <select id="whitelistTarget" title="术语规则范围">
+                <option value="file">当前文件共享</option>
+                <option value="personal">仅我使用</option>
+              </select>
+              <span id="whitelistScopeHint" class="whitelist-scope-hint">
+                有编辑权限的成员可共享词条
+              </span>
+            </div>
+            <textarea
+              id="whitelist"
+              spellcheck="false"
+              placeholder="每行一个术语（示例未添加）：&#10;蓝心小V&#10;小V圈搜&#10;iQOO 智能双面夹5 Pro&#10;iPhone&#10;ChatGPT"
+            ></textarea>
+            <div class="whitelist-actions">
+              <span id="saveStatus" class="count" hidden></span>
+              <button id="clearWhitelist">清空当前</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div id="allPreviewOverlay" class="modal-backdrop" hidden>
+      <section class="modal preview-modal" role="dialog" aria-modal="true" aria-labelledby="allPreviewTitle">
+        <h2 id="allPreviewTitle">全部修复预览</h2>
+        <p id="allPreviewDescription"></p>
+        <div id="allPreviewSummary" class="summary-grid"></div>
+        <p class="preview-note">仅修复本次检查列出的问题，不改动手动换行。</p>
+        <div class="preview-actions">
+          <button id="cancelFixAll">取消</button>
+          <button id="confirmFixAll" class="primary">确认全部修复</button>
+        </div>
+      </section>
+    </div>
+    <div id="clearWhitelistOverlay" class="modal-backdrop" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="clearWhitelistTitle">
+        <h2 id="clearWhitelistTitle">清空术语规则？</h2>
+        <p id="clearWhitelistDescription" class="confirm-description"></p>
+        <div class="preview-actions">
+          <button id="cancelClearWhitelist">取消</button>
+          <button id="confirmClearWhitelist" class="danger">确认清空</button>
+        </div>
+      </section>
+    </div>
+    <div id="settingsOverlay" class="modal-backdrop" hidden>
+      <section class="modal settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <div class="settings-title-row">
+          <h2 id="settingsTitle">规则设置</h2>
+          <button id="resetCleanupRules" class="settings-reset" type="button">
+            恢复默认
+          </button>
+        </div>
+        <div class="settings-sections">
+          <section class="settings-section">
+            <div class="settings-section-head">
+              <strong>扫描设置</strong>
+            </div>
+            <label class="settings-option">
+              <input id="ignoreHidden" type="checkbox" checked />
+              <span>跳过隐藏图层</span>
+            </label>
+          </section>
+          <section class="settings-section">
+            <div class="settings-section-head">
+              <strong>补充缺失空格</strong>
+            </div>
+            <div class="settings-options-inline">
+              <label class="settings-option">
+                <input id="addCjkLatinSpaces" type="checkbox" checked />
+                <span>补充中文与英文/普通数字之间 1 个空格</span>
+              </label>
+              <input id="addCjkNumberSpaces" type="checkbox" checked hidden />
+            </div>
+            <div class="settings-divider" aria-hidden="true"></div>
+            <label class="settings-option">
+              <input id="excludeScriptSpaces" type="checkbox" checked />
+              <span>排除角标</span>
+            </label>
+          </section>
+          <section class="settings-section">
+            <div class="settings-section-head">
+              <strong>清理多余空格</strong>
+            </div>
+            <label class="settings-option">
+              <input id="trimLineSpaces" type="checkbox" checked />
+              <span>删除行首、行尾空格</span>
+            </label>
+            <div class="settings-divider" aria-hidden="true"></div>
+            <label class="settings-option">
+              <input id="removeCjkSpaces" type="checkbox" checked />
+              <span>删除中文与中文之间的空格</span>
+            </label>
+            <label class="settings-option">
+              <input id="removeCjkPunctuationSpaces" type="checkbox" checked />
+              <span>删除中文与标点符号之间的空格</span>
+            </label>
+            <label class="settings-option">
+              <input id="removeScriptSpaces" type="checkbox" checked />
+              <span>删除角标左右空格</span>
+            </label>
+            <label class="settings-option">
+              <input id="normalizeCjkAsciiSpaces" type="checkbox" checked />
+              <span>中文与英文/数字之间多个空格压缩为 1 个</span>
+            </label>
+            <div class="settings-divider" aria-hidden="true"></div>
+            <label class="settings-option">
+              <input id="normalizeLatinSpaces" type="checkbox" checked />
+              <span>英文与英文/数字之间多个空格压缩为 1 个</span>
+            </label>
+            <input id="normalizeLatinNumberSpaces" type="checkbox" checked hidden />
+            <label class="settings-option">
+              <input id="normalizeNumberSpaces" type="checkbox" checked />
+              <span>数字与数字之间多个空格压缩为 1 个</span>
+            </label>
+            <label class="settings-option">
+              <input id="removeNumberSpaces" type="checkbox" />
+              <span>删除数字与数字之间空格（谨慎使用）</span>
+            </label>
+            <p class="settings-note">* 建议结合<strong>术语规则</strong>使用，仅适用于中文排版。</p>
+          </section>
+        </div>
+        <div class="preview-actions">
+          <button id="closeSettings" class="primary">完成</button>
+        </div>
+      </section>
+    </div>
+    <script>
+      const scope = document.getElementById("scope");
+      const scanButton = document.getElementById("scan");
+      const fixAllButton = document.getElementById("fixAll");
+      const openSettingsButton = document.getElementById("openSettings");
+      const addMissingSpacesInput = document.getElementById("addMissingSpaces");
+      const addCjkLatinSpacesInput = document.getElementById("addCjkLatinSpaces");
+      const addCjkNumberSpacesInput = document.getElementById("addCjkNumberSpaces");
+      const ignoreHiddenInput = document.getElementById("ignoreHidden");
+      const excludeScriptSpacesInput = document.getElementById("excludeScriptSpaces");
+      const removeExtraSpacesInput = document.getElementById("removeExtraSpaces");
+      const trimLineSpacesInput = document.getElementById("trimLineSpaces");
+      const removeCjkSpacesInput = document.getElementById("removeCjkSpaces");
+      const removeCjkPunctuationSpacesInput =
+        document.getElementById("removeCjkPunctuationSpaces");
+      const removeScriptSpacesInput = document.getElementById("removeScriptSpaces");
+      const normalizeLatinSpacesInput = document.getElementById("normalizeLatinSpaces");
+      const normalizeCjkAsciiSpacesInput = document.getElementById("normalizeCjkAsciiSpaces");
+      const normalizeLatinNumberSpacesInput =
+        document.getElementById("normalizeLatinNumberSpaces");
+      const normalizeNumberSpacesInput = document.getElementById("normalizeNumberSpaces");
+      const removeNumberSpacesInput = document.getElementById("removeNumberSpaces");
+      const resetCleanupRulesButton = document.getElementById("resetCleanupRules");
+      const extraSpaceWarning = document.getElementById("extraSpaceWarning");
+      const clearWhitelistButton = document.getElementById("clearWhitelist");
+      const whitelistTarget = document.getElementById("whitelistTarget");
+      const whitelistInput = document.getElementById("whitelist");
+      const issuesContainer = document.getElementById("issues");
+      const count = document.getElementById("count");
+      const resultStatus = document.getElementById("resultStatus");
+      const resultStatusText = document.getElementById("resultStatusText");
+      const issueFilters = document.getElementById("issueFilters");
+      const issueFilterButtons = Array.from(issueFilters.querySelectorAll(".issue-filter"));
+      const saveStatus = document.getElementById("saveStatus");
+      const whitelistScopeHint = document.getElementById("whitelistScopeHint");
+      const whitelistToggle = document.getElementById("whitelistToggle");
+      const whitelistContent = document.getElementById("whitelistContent");
+      const whitelistSummary = document.getElementById("whitelistSummary");
+      const allPreviewOverlay = document.getElementById("allPreviewOverlay");
+      const allPreviewDescription = document.getElementById("allPreviewDescription");
+      const allPreviewSummary = document.getElementById("allPreviewSummary");
+      const cancelFixAllButton = document.getElementById("cancelFixAll");
+      const confirmFixAllButton = document.getElementById("confirmFixAll");
+      const clearWhitelistOverlay = document.getElementById("clearWhitelistOverlay");
+      const clearWhitelistDescription = document.getElementById("clearWhitelistDescription");
+      const cancelClearWhitelistButton = document.getElementById("cancelClearWhitelist");
+      const confirmClearWhitelistButton = document.getElementById("confirmClearWhitelist");
+      const settingsOverlay = document.getElementById("settingsOverlay");
+      const closeSettingsButton = document.getElementById("closeSettings");
+      let issues = [];
+      let whitelistSaveTimer = null;
+      let whitelistDirty = false;
+      let whitelistSaveRequestId = 0;
+      const latestWhitelistSaveRequestIds = {
+        file: 0,
+        personal: 0
+      };
+      let hasInitializedWhitelistVisibility = false;
+      let activeIssueFilter = "all";
+      let latestIssuesMessage = null;
+      let isBusy = false;
+      let resultsStale = false;
+      let pendingWhitelistAction = null;
+      let fixAllPreviewTimer = null;
+      let whitelists = {
+        file: [],
+        personal: []
+      };
+      let activeWhitelistTarget = "file";
+
+      scanButton.onclick = () => {
+        setBusy(true, "正在扫描文本图层...");
+        parent.postMessage({ pluginMessage: getRequest("scan") }, "*");
+      };
+
+      fixAllButton.onclick = () => {
+        if (resultsStale) return;
+        setBusy(true, "正在生成全部修复预览...");
+        window.clearTimeout(fixAllPreviewTimer);
+        fixAllPreviewTimer = window.setTimeout(() => {
+          setBusy(false);
+          setResultStatus("failure", "修复预览生成超时，请重试。");
+        }, 8000);
+        parent.postMessage({ pluginMessage: getRequest("preview-all") }, "*");
+      };
+
+      for (const button of issueFilterButtons) {
+        button.onclick = () => {
+          activeIssueFilter = button.dataset.filter || "all";
+          renderIssues(latestIssuesMessage);
+        };
+      }
+
+      scope.addEventListener("change", () => {
+        markResultsStale("扫描范围已更改，请重新检查。");
+      });
+
+      addCjkLatinSpacesInput.addEventListener("change", () => {
+        addCjkNumberSpacesInput.checked = addCjkLatinSpacesInput.checked;
+      });
+
+      const detailedRuleInputs = [
+        addCjkLatinSpacesInput,
+        trimLineSpacesInput,
+        removeCjkSpacesInput,
+        removeCjkPunctuationSpacesInput,
+        removeScriptSpacesInput,
+        normalizeLatinSpacesInput,
+        normalizeCjkAsciiSpacesInput,
+        normalizeNumberSpacesInput,
+        removeNumberSpacesInput
+      ];
+
+      for (const input of detailedRuleInputs) {
+        input.addEventListener("change", () => {
+          markResultsStale("检查选项已更改，请重新检查。");
+        });
+      }
+
+      addMissingSpacesInput.addEventListener("change", handleSpacingRuleChange);
+
+      removeExtraSpacesInput.addEventListener("change", () => {
+        extraSpaceWarning.hidden = !removeExtraSpacesInput.checked;
+        handleSpacingRuleChange();
+      });
+
+      normalizeLatinSpacesInput.addEventListener("change", () => {
+        normalizeLatinNumberSpacesInput.checked = normalizeLatinSpacesInput.checked;
+      });
+
+      excludeScriptSpacesInput.addEventListener("change", () => {
+        removeScriptSpacesInput.checked = excludeScriptSpacesInput.checked;
+        syncDependentSettings();
+        markResultsStale("检查选项已更改，请重新检查。");
+      });
+
+      removeScriptSpacesInput.addEventListener("change", () => {
+        syncDependentSettings();
+        markResultsStale("检查选项已更改，请重新检查。");
+      });
+
+      resetCleanupRulesButton.addEventListener("click", () => {
+        addMissingSpacesInput.checked = true;
+        removeExtraSpacesInput.checked = false;
+        extraSpaceWarning.hidden = true;
+        ignoreHiddenInput.checked = true;
+        excludeScriptSpacesInput.checked = true;
+        addCjkLatinSpacesInput.checked = true;
+        addCjkNumberSpacesInput.checked = true;
+        trimLineSpacesInput.checked = true;
+        removeCjkSpacesInput.checked = true;
+        normalizeCjkAsciiSpacesInput.checked = true;
+        removeCjkPunctuationSpacesInput.checked = true;
+        removeScriptSpacesInput.checked = true;
+        normalizeLatinSpacesInput.checked = true;
+        normalizeLatinNumberSpacesInput.checked = true;
+        normalizeNumberSpacesInput.checked = true;
+        removeNumberSpacesInput.checked = false;
+        syncDependentSettings();
+        markResultsStale("规则设置已恢复默认，请重新检查。");
+      });
+
+      ignoreHiddenInput.addEventListener("change", () => {
+        markResultsStale("检查选项已更改，请重新检查。");
+      });
+
+      openSettingsButton.onclick = openSettings;
+      closeSettingsButton.onclick = closeSettings;
+      settingsOverlay.onclick = (event) => {
+        if (event.target === settingsOverlay) closeSettings();
+      };
+
+      whitelistToggle.onclick = toggleWhitelist;
+
+      function toggleWhitelist() {
+        setWhitelistExpanded(!isWhitelistExpanded());
+      }
+
+      cancelFixAllButton.onclick = () => {
+        closeFixAllPreview();
+      };
+
+      confirmFixAllButton.onclick = () => {
+        closeFixAllPreview();
+        parent.postMessage({ pluginMessage: getRequest("confirm-fix-all") }, "*");
+      };
+
+      function requestIssueFix(issue) {
+        if (resultsStale) return;
+        setBusy(true, "正在修复当前问题...");
+        const request = getRequest("fix-one");
+        request.id = issue.id;
+        parent.postMessage({ pluginMessage: request }, "*");
+      }
+
+      function openFixAllPreview() {
+        document.body.classList.add("modal-open");
+        allPreviewOverlay.scrollTop = 0;
+        allPreviewOverlay.hidden = false;
+        cancelFixAllButton.focus();
+        requestUiResize(true);
+      }
+
+      function closeFixAllPreview() {
+        allPreviewOverlay.hidden = true;
+        syncModalOpenState();
+        requestUiResize(isWhitelistExpanded() || issues.length > 0);
+      }
+
+      function getRequest(type) {
+        const shouldExcludeScriptSpaces = excludeScriptSpacesInput.checked;
+        const shouldRemoveScriptSpaces =
+          shouldExcludeScriptSpaces && removeScriptSpacesInput.checked;
+        return {
+          type,
+          scope: scope.value,
+          addMissingSpaces: addMissingSpacesInput.checked,
+          addCjkLatinSpaces: addCjkLatinSpacesInput.checked,
+          addCjkNumberSpaces: addCjkNumberSpacesInput.checked,
+          excludeScriptSpaces: shouldExcludeScriptSpaces,
+          addScriptSpaces: addMissingSpacesInput.checked && !shouldExcludeScriptSpaces,
+          ignoreScripts: shouldExcludeScriptSpaces,
+          keepScriptSpacesTight: shouldExcludeScriptSpaces,
+          ignoreHidden: ignoreHiddenInput.checked,
+          removeExtraSpaces: removeExtraSpacesInput.checked,
+          trimLineSpaces: trimLineSpacesInput.checked,
+          removeCjkSpaces: removeCjkSpacesInput.checked,
+          removeCjkPunctuationSpaces: removeCjkPunctuationSpacesInput.checked,
+          removeScriptSpaces: shouldRemoveScriptSpaces,
+          normalizeLatinSpaces: normalizeLatinSpacesInput.checked,
+          normalizeCjkAsciiSpaces: normalizeCjkAsciiSpacesInput.checked,
+          normalizeLatinNumberSpaces: normalizeLatinNumberSpacesInput.checked,
+          normalizeNumberSpaces: normalizeNumberSpacesInput.checked,
+          removeNumberSpaces: removeNumberSpacesInput.checked
+        };
+      }
+
+      function isWhitelistExpanded() {
+        return whitelistToggle.getAttribute("aria-expanded") === "true";
+      }
+
+      function setWhitelistExpanded(isExpanded) {
+        whitelistToggle.setAttribute("aria-expanded", String(isExpanded));
+        if (isExpanded) {
+          requestUiResize(true);
+          window.requestAnimationFrame(() => {
+            whitelistContent.hidden = false;
+          });
+          return;
+        }
+        whitelistContent.hidden = true;
+        requestUiResize(issues.length > 0);
+      }
+
+      function requestUiResize(expanded) {
+        const expandedHeight =
+          expanded && isWhitelistExpanded() && issues.length === 0
+            ? "whitelist-empty"
+            : "workspace";
+        parent.postMessage({
+          pluginMessage: {
+            type: "resize-ui",
+            expanded,
+            expandedHeight
+          }
+        }, "*");
+      }
+
+      function setBusy(nextBusy, message) {
+        isBusy = nextBusy;
+        updateScanAvailability();
+        fixAllButton.disabled = nextBusy || resultsStale || issues.length === 0;
+        scope.disabled = nextBusy;
+        addMissingSpacesInput.disabled = nextBusy;
+        openSettingsButton.disabled = nextBusy;
+        ignoreHiddenInput.disabled = nextBusy;
+        removeExtraSpacesInput.disabled = nextBusy;
+        syncDependentSettings();
+
+        if (nextBusy) {
+          setResultStatus("loading", message || "处理中...");
+        }
+      }
+
+      function hasActiveSpacingRule() {
+        return addMissingSpacesInput.checked || removeExtraSpacesInput.checked;
+      }
+
+      function updateScanAvailability() {
+        const hasRule = hasActiveSpacingRule();
+        scanButton.disabled = isBusy || !hasRule;
+        scanButton.title = hasRule ? "" : "请至少选择一项修正规则";
+      }
+
+      function handleSpacingRuleChange() {
+        syncDependentSettings();
+        updateScanAvailability();
+        markResultsStale("检查选项已更改，请重新检查。");
+        if (!hasActiveSpacingRule()) {
+          setResultStatus("warning", "请至少选择一项修正规则。");
+        } else if (!latestIssuesMessage) {
+          setResultStatus("", "等待检查");
+        }
+      }
+
+      function syncDependentSettings() {
+        if (!excludeScriptSpacesInput.checked) {
+          removeScriptSpacesInput.checked = false;
+        }
+        const missingInputs = [
+          addCjkLatinSpacesInput,
+          excludeScriptSpacesInput
+        ];
+        const cleanupInputs = [
+          trimLineSpacesInput,
+          removeCjkSpacesInput,
+          removeCjkPunctuationSpacesInput,
+          normalizeLatinSpacesInput,
+          normalizeCjkAsciiSpacesInput,
+          normalizeNumberSpacesInput,
+          removeNumberSpacesInput
+        ];
+        setSettingsGroupDisabled(
+          missingInputs,
+          isBusy || !addMissingSpacesInput.checked
+        );
+        setSettingsGroupDisabled(
+          cleanupInputs,
+          isBusy || !removeExtraSpacesInput.checked
+        );
+        excludeScriptSpacesInput.disabled =
+          isBusy || !addMissingSpacesInput.checked;
+        excludeScriptSpacesInput.parentElement.classList.toggle(
+          "is-disabled",
+          excludeScriptSpacesInput.disabled
+        );
+        removeScriptSpacesInput.disabled =
+          isBusy || !removeExtraSpacesInput.checked || !excludeScriptSpacesInput.checked;
+        removeScriptSpacesInput.parentElement.classList.toggle(
+          "is-disabled",
+          removeScriptSpacesInput.disabled
+        );
+        resetCleanupRulesButton.disabled = isBusy;
+      }
+
+      function setSettingsGroupDisabled(inputs, disabled) {
+        for (const input of inputs) {
+          input.disabled = disabled;
+          input.parentElement.classList.toggle("is-disabled", disabled);
+        }
+      }
+
+      function openSettings() {
+        syncDependentSettings();
+        settingsOverlay.hidden = false;
+        document.body.classList.add("modal-open");
+        closeSettingsButton.focus();
+        requestUiResize(true);
+      }
+
+      function closeSettings() {
+        settingsOverlay.hidden = true;
+        syncModalOpenState();
+        requestUiResize(isWhitelistExpanded() || issues.length > 0);
+      }
+
+      function syncModalOpenState() {
+        const hasOpenModal =
+          !allPreviewOverlay.hidden ||
+          !clearWhitelistOverlay.hidden ||
+          !settingsOverlay.hidden;
+        document.body.classList.toggle("modal-open", hasOpenModal);
+      }
+
+      function markResultsStale(message) {
+        if (!issues.length || !latestIssuesMessage) return;
+        resultsStale = true;
+        fixAllButton.title = "请先按当前条件重新检查";
+        renderIssues(latestIssuesMessage);
+        setResultStatus("warning", message);
+      }
+
+      function setResultStatus(status, message) {
+        resultStatus.className = "result-status";
+        resultStatus.innerHTML = "";
+
+        if (status === "loading") {
+          const spinner = document.createElement("span");
+          spinner.className = "status-spinner";
+          resultStatus.appendChild(spinner);
+        } else if (status) {
+          resultStatus.classList.add(`is-${status}`);
+        }
+
+        resultStatusText.textContent = message;
+        resultStatus.appendChild(resultStatusText);
+      }
+
+      whitelistInput.addEventListener("input", () => {
+        updateClearWhitelistButton();
+        whitelistDirty = true;
+        setWhitelistSaveStatus("正在输入...");
+        window.clearTimeout(whitelistSaveTimer);
+        whitelistSaveTimer = window.setTimeout(saveWhitelist, 500);
+      });
+
+      whitelistInput.addEventListener("blur", () => {
+        if (!whitelistDirty) {
+          updateClearWhitelistButton();
+          return;
+        }
+        window.clearTimeout(whitelistSaveTimer);
+        saveWhitelist();
+      });
+
+      whitelistTarget.addEventListener("change", () => {
+        window.clearTimeout(whitelistSaveTimer);
+        if (whitelistDirty) saveWhitelist(activeWhitelistTarget);
+        activeWhitelistTarget = whitelistTarget.value;
+        renderWhitelist();
+      });
+
+      clearWhitelistButton.onclick = () => {
+        const items = getWhitelistInputItems();
+        if (!items.length) return;
+        const target = whitelistTarget.value;
+        const targetLabel = getWhitelistTargetLabel(target);
+        clearWhitelistDescription.textContent = target === "file"
+          ? `将删除${targetLabel}中的 ${items.length} 个术语，并影响同一文件中有编辑权限的成员。`
+          : `将删除${targetLabel}中的 ${items.length} 个术语。`;
+        clearWhitelistOverlay.hidden = false;
+        document.body.classList.add("modal-open");
+        confirmClearWhitelistButton.focus();
+      };
+
+      cancelClearWhitelistButton.onclick = closeClearWhitelistConfirm;
+
+      clearWhitelistOverlay.onclick = (event) => {
+        if (event.target === clearWhitelistOverlay) closeClearWhitelistConfirm();
+      };
+
+      confirmClearWhitelistButton.onclick = () => {
+        const target = whitelistTarget.value;
+        const items = getWhitelistInputItems();
+        closeClearWhitelistConfirm();
+        if (!items.length) return;
+
+        window.clearTimeout(whitelistSaveTimer);
+        whitelistDirty = false;
+        whitelistInput.value = "";
+        setWhitelistSaveStatus("清空中");
+        const requestId = createWhitelistRequestId(target);
+        pendingWhitelistAction = {
+          type: "clear",
+          requestId,
+          target,
+          items
+        };
+        setWhitelistActionBusy(true);
+        parent.postMessage({
+          pluginMessage: {
+            type: "clear-whitelist",
+            requestId,
+            target
+          }
+        }, "*");
+      };
+
+      function closeClearWhitelistConfirm() {
+        clearWhitelistOverlay.hidden = true;
+        syncModalOpenState();
+      }
+
+      function getWhitelistInputItems() {
+        const uniqueItems = [];
+        const seenItems = new Set();
+        const items = whitelistInput.value
+          .split(/\r?\n/)
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0);
+
+        for (const item of items) {
+          if (seenItems.has(item)) continue;
+          seenItems.add(item);
+          uniqueItems.push(item);
+        }
+
+        return uniqueItems;
+      }
+
+      function getWhitelistTargetLabel(target) {
+        return target === "file" ? "当前文件共享术语规则" : "个人术语规则";
+      }
+
+      function setWhitelistActionBusy(isActionBusy) {
+        whitelistTarget.disabled = isActionBusy;
+        whitelistInput.disabled = isActionBusy;
+        clearWhitelistButton.disabled = isActionBusy || getWhitelistInputItems().length === 0;
+      }
+
+      function updateClearWhitelistButton() {
+        clearWhitelistButton.disabled =
+          Boolean(pendingWhitelistAction) || getWhitelistInputItems().length === 0;
+      }
+
+      function saveWhitelist(target = activeWhitelistTarget) {
+        if (!whitelistDirty) return;
+        whitelistDirty = false;
+        setWhitelistSaveStatus("保存中");
+        const requestId = createWhitelistRequestId(target);
+        parent.postMessage({
+          pluginMessage: {
+            type: "save-whitelist",
+            requestId,
+            target,
+            items: getWhitelistInputItems()
+          }
+        }, "*");
+      }
+
+      function createWhitelistRequestId(target) {
+        const requestId = ++whitelistSaveRequestId;
+        latestWhitelistSaveRequestIds[target] = requestId;
+        return requestId;
+      }
+
+      function updateWhitelists(message) {
+        if (Array.isArray(message.fileWhitelist)) whitelists.file = message.fileWhitelist;
+        if (Array.isArray(message.personalWhitelist)) whitelists.personal = message.personalWhitelist;
+      }
+
+      function renderWhitelist() {
+        const target = whitelistTarget.value;
+        activeWhitelistTarget = target;
+        whitelistInput.value = whitelists[target].join("\n");
+        whitelistInput.disabled = false;
+        whitelistDirty = false;
+        updateClearWhitelistButton();
+        updateWhitelistSaveStatus(target);
+        renderWhitelistSummary();
+        initializeWhitelistVisibility();
+      }
+
+      function updateWhitelistSaveStatus(target) {
+        clearWhitelistSaveStatus();
+        whitelistScopeHint.textContent = target === "file"
+          ? "有编辑权限的成员可共享词条"
+          : "仅保存在本机";
+        saveStatus.removeAttribute("title");
+      }
+
+      function setWhitelistSaveStatus(message) {
+        saveStatus.textContent = message;
+        saveStatus.hidden = false;
+      }
+
+      function clearWhitelistSaveStatus() {
+        saveStatus.textContent = "";
+        saveStatus.hidden = true;
+      }
+
+      function renderWhitelistSummary() {
+        whitelistSummary.textContent = `文件 ${whitelists.file.length} 条 · 个人 ${whitelists.personal.length} 条`;
+      }
+
+      function initializeWhitelistVisibility() {
+        if (hasInitializedWhitelistVisibility) return;
+        hasInitializedWhitelistVisibility = true;
+        const hasAnyTerms = whitelists.file.length + whitelists.personal.length > 0;
+        if (!hasAnyTerms) setWhitelistExpanded(true);
+      }
+
+      window.onmessage = (event) => {
+        const message = event.data.pluginMessage;
+        if (!message) return;
+
+        if (message.type === "state") {
+          updateWhitelists(message);
+          renderWhitelist();
+        }
+
+        if (message.type === "issues") {
+          issues = message.issues;
+          latestIssuesMessage = message;
+          resultsStale = false;
+          fixAllButton.title = "修复本次检查的全部问题，不受结果筛选影响";
+          setBusy(false);
+          renderIssues(message);
+        }
+
+        if (message.type === "fix-all-preview") {
+          window.clearTimeout(fixAllPreviewTimer);
+          setBusy(false);
+          try {
+            renderFixAllPreview(message.preview);
+          } catch (error) {
+            closeFixAllPreview();
+            setResultStatus("failure", "修复预览显示失败，请重试。");
+          }
+        }
+
+        if (message.type === "fix-all-preview-failed") {
+          window.clearTimeout(fixAllPreviewTimer);
+          setBusy(false);
+          closeFixAllPreview();
+          setResultStatus("failure", message.message || "无法生成修复预览，请重试。");
+        }
+
+        if (message.type === "whitelist-saved") {
+          const target = message.target === "personal" ? "personal" : "file";
+          if (message.requestId !== latestWhitelistSaveRequestIds[target]) return;
+          if (target === "file" && Array.isArray(message.fileWhitelist)) {
+            whitelists.file = message.fileWhitelist;
+          }
+          if (target === "personal" && Array.isArray(message.personalWhitelist)) {
+            whitelists.personal = message.personalWhitelist;
+          }
+          renderWhitelistSummary();
+          if (
+            pendingWhitelistAction &&
+            pendingWhitelistAction.requestId === message.requestId
+          ) {
+            pendingWhitelistAction = null;
+            setWhitelistActionBusy(false);
+          }
+          if (message.target === whitelistTarget.value) {
+            updateWhitelistSaveStatus(message.target);
+            setWhitelistSaveStatus("已保存");
+          }
+          markResultsStale("术语规则已更新，请重新检查。");
+        }
+
+        if (message.type === "whitelist-save-failed") {
+          const target = message.target === "personal" ? "personal" : "file";
+          if (message.requestId !== latestWhitelistSaveRequestIds[target]) return;
+          if (
+            pendingWhitelistAction &&
+            pendingWhitelistAction.requestId === message.requestId
+          ) {
+            const failedAction = pendingWhitelistAction;
+            if (
+              failedAction.type === "clear" &&
+              failedAction.target === whitelistTarget.value
+            ) {
+              whitelistInput.value = failedAction.items.join("\n");
+            }
+            pendingWhitelistAction = null;
+            setWhitelistActionBusy(false);
+            whitelistDirty = false;
+          } else {
+            whitelistDirty = true;
+          }
+          setWhitelistSaveStatus("保存失败");
+        }
+      };
+
+      function renderIssues(message) {
+        ensureActiveIssueFilter();
+        const visibleIssues = getVisibleIssues();
+        const groups = groupIssuesByNode(visibleIssues);
+        const allGroups = groupIssuesByNode(issues);
+        document.body.classList.toggle("has-results", issues.length > 0);
+        count.textContent = visibleIssues.length
+          ? activeIssueFilter === "all"
+            ? `${visibleIssues.length} 处 · ${groups.length} 个图层`
+            : `${visibleIssues.length} / ${issues.length} 处 · ${groups.length} 个图层`
+          : "0 处";
+        issuesContainer.innerHTML = "";
+        issuesContainer.classList.toggle("is-stale", resultsStale);
+        fixAllButton.disabled = isBusy || resultsStale || issues.length === 0;
+        renderIssueFilters();
+
+        if (resultsStale) {
+          setResultStatus("warning", "检查条件已更改，请重新检查。");
+        } else if (message && message.status === "failure") {
+          setResultStatus("failure", message.message || "操作失败，请重试。");
+        } else if (message && message.emptyReason === "no-selection") {
+          setResultStatus("warning", "未选择内容，请先在画布中选择文本图层或容器。");
+        } else if (message && message.message) {
+          setResultStatus("success", message.message);
+        } else if (message && message.status === "success" && issues.length) {
+          setResultStatus(
+            "success",
+            `已扫描 ${message.scannedNodeCount} 个文本图层`
+          );
+        } else if (message && message.status === "success") {
+          setResultStatus(
+            "success",
+            `检查完成：扫描 ${message.scannedNodeCount} 个文本图层，未发现问题。`
+          );
+        }
+
+        if (!issues.length) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          if (message && message.status === "failure") {
+            empty.textContent = "检查未完成，请重试。";
+          } else if (message && message.emptyReason === "no-selection") {
+            empty.textContent = "选择内容后再次点击“检查”。";
+          } else {
+            empty.textContent = "当前扫描范围没有发现间距问题。";
+          }
+          issuesContainer.appendChild(empty);
+          requestUiResize(isWhitelistExpanded());
+          return;
+        }
+
+          if (!visibleIssues.length) {
+            const empty = document.createElement("div");
+            empty.className = "empty";
+            empty.textContent = activeIssueFilter === "missing-space"
+              ? "没有缺少空格的问题。"
+              : activeIssueFilter === "extra-space"
+                ? "没有多余空格问题。"
+              : "没有术语格式问题。";
+            issuesContainer.appendChild(empty);
+            requestUiResize(true);
+            return;
+        }
+
+        for (const group of groups) {
+          const item = document.createElement("article");
+          item.className = "issue";
+
+          const head = document.createElement("div");
+          head.className = "issue-head";
+
+          const node = document.createElement("div");
+          node.className = "node";
+
+          if (group.pageName) {
+            const pageName = document.createElement("span");
+            pageName.className = "node-page";
+            pageName.textContent = group.pageName;
+
+            const separator = document.createElement("span");
+            separator.className = "node-separator";
+            separator.textContent = "·";
+
+            node.append(pageName, separator);
+          }
+
+          const layerName = document.createElement("span");
+          layerName.className = "node-layer";
+          layerName.textContent = group.nodeName;
+          node.appendChild(layerName);
+
+          const groupCount = document.createElement("span");
+          groupCount.className = "group-count";
+          const allGroup = allGroups.find((item) => item.nodeId === group.nodeId);
+          groupCount.textContent = activeIssueFilter === "all" || !allGroup
+            ? `${group.issues.length} 处`
+            : `${group.issues.length} / ${allGroup.issues.length} 处`;
+
+          head.append(node, groupCount);
+          item.appendChild(head);
+
+          for (const issue of group.issues) {
+            const row = document.createElement("div");
+            row.className = "issue-row";
+
+            const copy = document.createElement("div");
+            copy.className = "issue-copy";
+
+            const meta = document.createElement("div");
+            meta.className = "issue-meta";
+
+            const kind = document.createElement("span");
+            kind.className = "issue-kind";
+            kind.textContent = getIssueKindLabel(issue.type);
+
+            const pair = document.createElement("span");
+            pair.className = "pair";
+            appendVisibleSpaces(pair, issue.beforeDifference || issue.pair);
+
+            const arrow = document.createElement("span");
+            arrow.className = "difference-arrow";
+            arrow.textContent = "→";
+
+            const after = document.createElement("span");
+            after.className = "pair difference-after";
+            appendVisibleSpaces(after, issue.afterDifference || issue.pair);
+
+            const excerpt = document.createElement("div");
+            excerpt.className = "excerpt";
+            excerpt.textContent = issue.excerpt;
+            excerpt.title = issue.excerpt;
+
+            const actions = document.createElement("div");
+            actions.className = "issue-actions";
+
+            const select = document.createElement("button");
+            select.className = "issue-action-locate";
+            select.textContent = "定位";
+            select.onclick = () => parent.postMessage({
+              pluginMessage: {
+                type: "select-issue",
+                id: issue.id
+              }
+            }, "*");
+
+            const fix = document.createElement("button");
+            fix.className = "issue-action-fix";
+            fix.textContent = "修复";
+            fix.disabled = resultsStale;
+            if (resultsStale) fix.title = "请先按当前条件重新检查";
+            fix.onclick = () => requestIssueFix(issue);
+
+            meta.append(kind, pair, arrow, after);
+            copy.append(meta, excerpt);
+            actions.append(select, fix);
+            row.append(copy, actions);
+            item.appendChild(row);
+          }
+
+          issuesContainer.appendChild(item);
+        }
+
+        requestUiResize(true);
+      }
+
+      function getVisibleIssues() {
+        if (activeIssueFilter === "all") return issues;
+        if (activeIssueFilter === "extra-space") {
+          return issues.filter((issue) => isExtraSpaceIssueType(issue.type));
+        }
+        return issues.filter((issue) => issue.type === activeIssueFilter);
+      }
+
+      function ensureActiveIssueFilter() {
+        if (activeIssueFilter === "all") return;
+        const hasMatchingIssue = activeIssueFilter === "extra-space"
+          ? issues.some((issue) => isExtraSpaceIssueType(issue.type))
+          : issues.some((issue) => issue.type === activeIssueFilter);
+        if (!hasMatchingIssue) activeIssueFilter = "all";
+      }
+
+      function renderIssueFilters() {
+        const missingCount = issues.filter((issue) => issue.type === "missing-space").length;
+        const extraCount = issues.filter((issue) => isExtraSpaceIssueType(issue.type)).length;
+        const termFormatCount = issues.filter((issue) => issue.type === "term-format").length;
+        const labels = {
+          all: `全部 ${issues.length}`,
+          "missing-space": `缺少空格 ${missingCount}`,
+          "extra-space": `多余空格 ${extraCount}`
+        };
+
+        issueFilters.hidden = issues.length === 0;
+
+        for (const button of issueFilterButtons) {
+          const filter = button.dataset.filter || "all";
+          if (filter === "term-format") {
+            button.textContent = `术语格式 ${termFormatCount}`;
+          } else {
+            button.textContent = labels[filter];
+          }
+          button.classList.toggle("is-selected", filter === activeIssueFilter);
+          button.setAttribute("aria-pressed", String(filter === activeIssueFilter));
+          button.disabled = filter === "missing-space"
+            ? missingCount === 0
+            : filter === "extra-space"
+              ? extraCount === 0
+            : filter === "term-format" && termFormatCount === 0;
+        }
+      }
+
+      function isExtraSpaceIssueType(type) {
+        return type === "line-edge-extra-space" ||
+          type === "cjk-extra-space" ||
+          type === "cjk-punctuation-extra-space" ||
+          type === "script-extra-space" ||
+          type === "number-extra-space" ||
+          type === "repeated-extra-space";
+      }
+
+      function getIssueKindLabel(type) {
+        if (type === "term-format") return "术语格式";
+        if (type === "line-edge-extra-space") return "行首尾空格";
+        if (type === "cjk-extra-space") return "中文间空格";
+        if (type === "cjk-punctuation-extra-space") return "中文标点旁空格";
+        if (type === "script-extra-space") return "角标左右空格";
+        if (type === "number-extra-space") return "数字间空格";
+        if (type === "repeated-extra-space") return "连续多余空格";
+        if (isExtraSpaceIssueType(type)) return "多余空格";
+        return "缺少空格";
+      }
+
+      function groupIssuesByNode(items) {
+        const groups = [];
+        const groupMap = new Map();
+
+        for (const issue of items) {
+          let group = groupMap.get(issue.nodeId);
+          if (!group) {
+            group = {
+              nodeId: issue.nodeId,
+              nodeName: issue.nodeName,
+              pageName: issue.pageName,
+              issues: []
+            };
+            groupMap.set(issue.nodeId, group);
+            groups.push(group);
+          }
+          group.issues.push(issue);
+        }
+
+        return groups;
+      }
+
+      function appendVisibleSpaces(container, value) {
+        container.textContent = String(value || "");
+      }
+
+      function renderFixAllPreview(preview) {
+        allPreviewSummary.innerHTML = "";
+
+        if (!preview || !preview.valid) {
+          allPreviewDescription.textContent = "当前没有可修复的问题。";
+          confirmFixAllButton.disabled = true;
+          openFixAllPreview();
+          return;
+        }
+
+        confirmFixAllButton.disabled = false;
+        allPreviewDescription.textContent = "确认后将按以下统计执行批量修复。";
+        const breakdown = preview.breakdown || {};
+
+        const total = document.createElement("div");
+        total.className = "summary-total";
+        const totalCopy = document.createElement("div");
+        const totalEyebrow = document.createElement("div");
+        totalEyebrow.className = "summary-eyebrow";
+        totalEyebrow.textContent = "Total issues";
+        const totalLabel = document.createElement("div");
+        totalLabel.className = "summary-total-copy";
+        totalLabel.textContent = "全部问题";
+        const totalMeta = document.createElement("div");
+        totalMeta.className = "summary-total-copy";
+        totalMeta.textContent = `涉及 ${preview.nodeCount} 个文本图层`;
+        totalCopy.append(totalEyebrow, totalLabel, totalMeta);
+        const totalValue = document.createElement("strong");
+        totalValue.className = "summary-total-value";
+        totalValue.textContent = preview.issueCount;
+        total.append(totalCopy, totalValue);
+        allPreviewSummary.appendChild(total);
+
+        const subgrid = document.createElement("div");
+        subgrid.className = "summary-subgrid";
+        const summaries = [
+          {
+            eyebrow: "Missing",
+            label: "缺少空格",
+            value: preview.missingSpaces,
+            details: [
+              [breakdown.missingCjkLatin || 0, "中文与英文"],
+              [breakdown.missingCjkNumber || 0, "中文与普通数字"],
+              [breakdown.missingScript || 0, "中文与数字角标"]
+            ]
+          },
+          {
+            eyebrow: "Extra",
+            label: "多余空格",
+            value: preview.extraSpaces,
+            details: [
+              [breakdown.extraLineEdges || 0, "行首、行尾"],
+              [breakdown.extraCjk || 0, "中文之间"],
+              [breakdown.extraCjkPunctuation || 0, "中文与标点"],
+              [breakdown.extraScript || 0, "角标左右"],
+              [breakdown.extraCjkLatin || 0, "中文与英文"],
+              [breakdown.extraCjkNumber || 0, "中文与普通数字"],
+              [breakdown.extraLatin || 0, "英文之间"],
+              [breakdown.extraLatinNumber || 0, "英文与数字"],
+              [breakdown.extraNumber || 0, "数字之间"]
+            ],
+            risk: removeExtraSpacesInput.checked && preview.extraSpaces > 0
+              ? "可能删除刻意保留的排版空格，请确认。"
+              : ""
+          },
+          {
+            eyebrow: "Terms",
+            label: "术语格式",
+            value: preview.termFormatIssues,
+            details: preview.termFormatIssues
+              ? [[preview.termFormatIssues, "按术语规则校正"]]
+              : []
+          }
+        ];
+
+        for (const summary of summaries) {
+          const item = document.createElement("div");
+          item.className = "summary-item";
+          const eyebrow = document.createElement("div");
+          eyebrow.className = "summary-eyebrow";
+          eyebrow.textContent = summary.eyebrow;
+          const metric = document.createElement("div");
+          metric.className = "summary-metric";
+          const valueNode = document.createElement("span");
+          valueNode.className = "summary-value";
+          valueNode.textContent = summary.value;
+          const labelNode = document.createElement("span");
+          labelNode.className = "summary-label";
+          labelNode.textContent = summary.label;
+          metric.append(valueNode, labelNode);
+          item.append(eyebrow, metric);
+
+          const visibleDetails = summary.details.filter(([value]) => value > 0);
+          if (visibleDetails.length) {
+            const details = document.createElement("div");
+            details.className = "summary-details";
+            for (const [value, label] of visibleDetails) {
+              const detail = document.createElement("div");
+              detail.className = "summary-detail";
+              const detailValue = document.createElement("span");
+              detailValue.className = "summary-detail-value";
+              detailValue.textContent = value;
+              const detailLabel = document.createElement("span");
+              detailLabel.className = "summary-detail-label";
+              detailLabel.textContent = label;
+              detail.append(detailValue, detailLabel);
+              details.appendChild(detail);
+            }
+            item.appendChild(details);
+          }
+
+          if (summary.risk) {
+            const risk = document.createElement("div");
+            risk.className = "summary-risk";
+            risk.textContent = summary.risk;
+            item.appendChild(risk);
+          }
+          subgrid.appendChild(item);
+        }
+
+        allPreviewSummary.appendChild(subgrid);
+        openFixAllPreview();
+      }
+
+      syncDependentSettings();
+      updateScanAvailability();
+    </script>
+  </body>
+</html>

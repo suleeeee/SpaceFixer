@@ -1333,7 +1333,7 @@ function isAsciiDigit(char) {
 }
 
 function getLooseTermRanges(text, terms) {
-  return getTermMatches(text, terms).map((match) => ({
+  return getTermMatchCandidates(text, terms).map((match) => ({
     start: match.start,
     end: match.end
   }));
@@ -1354,6 +1354,38 @@ function getTermRuleDefinitions(terms) {
 }
 
 function getTermMatches(text, terms) {
+  const candidates = getTermMatchCandidates(text, terms);
+  candidates.sort((a, b) => a.start - b.start || b.end - a.end);
+  const matches = [];
+
+  for (const candidate of candidates) {
+    const overlappingMatches = matches.filter((match) =>
+      candidate.start < match.end && candidate.end > match.start
+    );
+    if (!overlappingMatches.length) {
+      matches.push(candidate);
+      continue;
+    }
+
+    const preferred = overlappingMatches.reduce((best, match) =>
+      shouldPreferTermCandidate(match, best) ? match : best,
+      candidate
+    );
+    if (preferred === candidate) {
+      for (let index = matches.length - 1; index >= 0; index -= 1) {
+        const match = matches[index];
+        if (candidate.start < match.end && candidate.end > match.start) {
+          matches.splice(index, 1);
+        }
+      }
+      matches.push(candidate);
+    }
+  }
+
+  return matches.sort((a, b) => a.start - b.start || a.end - b.end);
+}
+
+function getTermMatchCandidates(text, terms) {
   const candidates = [];
 
   for (const rule of getTermRuleDefinitions(terms)) {
@@ -1371,17 +1403,19 @@ function getTermMatches(text, terms) {
     }
   }
 
-  candidates.sort((a, b) => a.start - b.start || b.end - a.end);
-  const matches = [];
+  return candidates;
+}
 
-  for (const candidate of candidates) {
-    const overlaps = matches.some((match) =>
-      candidate.start < match.end && candidate.end > match.start
-    );
-    if (!overlaps) matches.push(candidate);
-  }
+function shouldPreferTermCandidate(candidate, current) {
+  const candidateNeedsFormat = candidate.actual !== candidate.expected;
+  const currentNeedsFormat = current.actual !== current.expected;
+  if (candidateNeedsFormat !== currentNeedsFormat) return candidateNeedsFormat;
 
-  return matches;
+  const candidateLength = candidate.end - candidate.start;
+  const currentLength = current.end - current.start;
+  if (candidateLength !== currentLength) return candidateLength > currentLength;
+
+  return candidate.start < current.start;
 }
 
 function createLooseTermPattern(compact) {

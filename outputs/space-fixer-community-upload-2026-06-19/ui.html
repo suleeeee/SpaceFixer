@@ -38,6 +38,7 @@
 
       button,
       textarea,
+      input,
       select {
         font: inherit;
       }
@@ -496,6 +497,46 @@
       }
 
       .issue-action-locate {
+        border-color: transparent;
+        background: transparent;
+        color: var(--muted);
+      }
+
+      .issue-action-term {
+        border-color: transparent;
+        background: transparent;
+        color: var(--tertiary);
+      }
+
+      .issue-action-term:hover {
+        border-color: transparent;
+        background: var(--panel-secondary);
+        color: var(--muted);
+      }
+
+      .issue-ignore-editor {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        gap: 8px;
+        align-items: center;
+        border-top: 1px solid var(--border);
+        background: var(--panel-secondary);
+        padding: 8px 10px;
+      }
+
+      .issue-ignore-input {
+        width: 100%;
+        min-width: 0;
+        height: 30px;
+      }
+
+      .issue-ignore-save,
+      .issue-ignore-cancel {
+        height: 30px;
+        padding: 0 10px;
+      }
+
+      .issue-ignore-cancel {
         border-color: transparent;
         background: transparent;
         color: var(--muted);
@@ -1875,6 +1916,7 @@
       let latestIssuesMessage = null;
       let isBusy = false;
       let resultsStale = false;
+      let activeIgnoreIssueId = null;
       let pendingWhitelistAction = null;
       let fixAllPreviewTimer = null;
       let whitelists = {
@@ -2001,11 +2043,76 @@
       };
 
       function requestIssueFix(issue) {
-        if (resultsStale) return;
+        if (isBusy || resultsStale) return;
         setBusy(true, "正在修复当前问题...");
         const request = getRequest("fix-one");
         request.id = issue.id;
         parent.postMessage({ pluginMessage: request }, "*");
+      }
+
+      function openIssueIgnoreEditor(issue) {
+        if (resultsStale || isBusy) return;
+        activeIgnoreIssueId = activeIgnoreIssueId === issue.id ? null : issue.id;
+        renderIssues(latestIssuesMessage);
+        if (activeIgnoreIssueId) {
+          window.requestAnimationFrame(() => {
+            const input = issuesContainer.querySelector(".issue-ignore-input");
+            if (input) {
+              input.focus();
+              input.select();
+            }
+          });
+        }
+      }
+
+      function saveIssueIgnoreTerm(issue, input) {
+        if (resultsStale || isBusy || !input) return;
+        const term = input.value.trim();
+        if (!term) {
+          input.focus();
+          return;
+        }
+
+        const target = whitelistTarget.value;
+        const sourceItems = target === activeWhitelistTarget
+          ? getWhitelistInputItems()
+          : whitelists[target];
+        const seenItems = new Set(sourceItems.map((item) => item.trim()));
+
+        if (seenItems.has(term)) {
+          activeIgnoreIssueId = null;
+          renderIssues(latestIssuesMessage);
+          setBusy(true, "术语已存在，正在重新检查...");
+          parent.postMessage({ pluginMessage: getRequest("scan") }, "*");
+          return;
+        }
+
+        const nextItems = [...sourceItems, term];
+
+        if (target === whitelistTarget.value) {
+          window.clearTimeout(whitelistSaveTimer);
+          whitelistInput.value = nextItems.join("\n");
+          whitelistDirty = false;
+          updateClearWhitelistButton();
+          setWhitelistSaveStatus("保存中");
+        }
+
+        const requestId = saveWhitelistItems(target, nextItems);
+        pendingWhitelistAction = {
+          type: "ignore",
+          requestId,
+          target,
+          term
+        };
+        setWhitelistActionBusy(true);
+        setBusy(true, "正在保存术语...");
+      }
+
+      function getIssueWhitelistTerm(issue) {
+        if (issue.type === "missing-space") return (issue.pair || "").trim();
+        if (issue.type === "term-format") return (issue.actual || issue.term || "").trim();
+        if (isExtraSpaceIssueType(issue.type)) return (issue.actual || issue.beforeDifference || "").trim();
+        return "";
       }
 
       function openFixAllPreview() {
@@ -2322,15 +2429,20 @@
         if (!whitelistDirty) return;
         whitelistDirty = false;
         setWhitelistSaveStatus("保存中");
+        saveWhitelistItems(target, getWhitelistInputItems());
+      }
+
+      function saveWhitelistItems(target, items) {
         const requestId = createWhitelistRequestId(target);
         parent.postMessage({
           pluginMessage: {
             type: "save-whitelist",
             requestId,
             target,
-            items: getWhitelistInputItems()
+            items
           }
         }, "*");
+        return requestId;
       }
 
       function createWhitelistRequestId(target) {
@@ -2431,16 +2543,25 @@
             whitelists.personal = message.personalWhitelist;
           }
           renderWhitelistSummary();
+          let completedWhitelistAction = null;
           if (
             pendingWhitelistAction &&
             pendingWhitelistAction.requestId === message.requestId
           ) {
+            completedWhitelistAction = pendingWhitelistAction;
             pendingWhitelistAction = null;
             setWhitelistActionBusy(false);
           }
           if (message.target === whitelistTarget.value) {
             updateWhitelistSaveStatus(message.target);
             setWhitelistSaveStatus("已保存");
+          }
+          if (completedWhitelistAction && completedWhitelistAction.type === "ignore") {
+            activeIgnoreIssueId = null;
+            renderIssues(latestIssuesMessage);
+            setBusy(true, `已忽略「${completedWhitelistAction.term}」，正在重新检查...`);
+            parent.postMessage({ pluginMessage: getRequest("scan") }, "*");
+            return;
           }
           markResultsStale("术语规则已更新，请重新检查。");
         }
@@ -2462,6 +2583,14 @@
             pendingWhitelistAction = null;
             setWhitelistActionBusy(false);
             whitelistDirty = false;
+            if (failedAction.type === "ignore") {
+              if (failedAction.target === whitelistTarget.value) {
+                whitelistInput.value = whitelists[failedAction.target].join("\n");
+                updateClearWhitelistButton();
+              }
+              setBusy(false);
+              setResultStatus("failure", "术语保存失败，请重试。");
+            }
           } else {
             whitelistDirty = true;
           }
@@ -2607,25 +2736,74 @@
             const select = document.createElement("button");
             select.className = "issue-action-locate";
             select.textContent = "定位";
-            select.onclick = () => parent.postMessage({
-              pluginMessage: {
-                type: "select-issue",
-                id: issue.id
-              }
-            }, "*");
+            select.disabled = isBusy;
+            select.onclick = () => {
+              if (isBusy) return;
+              parent.postMessage({
+                pluginMessage: {
+                  type: "select-issue",
+                  id: issue.id
+                }
+              }, "*");
+            };
+
+            const addTerm = document.createElement("button");
+            addTerm.className = "issue-action-term";
+            addTerm.textContent = "忽略";
+            addTerm.disabled = isBusy || resultsStale || !getIssueWhitelistTerm(issue);
+            if (resultsStale) addTerm.title = "请先按当前条件重新检查";
+            addTerm.onclick = () => openIssueIgnoreEditor(issue);
 
             const fix = document.createElement("button");
             fix.className = "issue-action-fix";
             fix.textContent = "修复";
-            fix.disabled = resultsStale;
+            fix.disabled = isBusy || resultsStale;
             if (resultsStale) fix.title = "请先按当前条件重新检查";
             fix.onclick = () => requestIssueFix(issue);
 
             meta.append(kind, pair, arrow, after);
             copy.append(meta, excerpt);
-            actions.append(select, fix);
+            actions.append(addTerm, select, fix);
             row.append(copy, actions);
             item.appendChild(row);
+
+            if (activeIgnoreIssueId === issue.id) {
+              const editor = document.createElement("div");
+              editor.className = "issue-ignore-editor";
+
+              const input = document.createElement("input");
+              input.className = "issue-ignore-input";
+              input.type = "text";
+              input.value = getIssueWhitelistTerm(issue);
+              input.placeholder = "输入要忽略的完整术语";
+              input.setAttribute("aria-label", "要加入白名单的术语");
+
+              const cancel = document.createElement("button");
+              cancel.className = "issue-ignore-cancel";
+              cancel.type = "button";
+              cancel.textContent = "取消";
+              cancel.onclick = () => {
+                activeIgnoreIssueId = null;
+                renderIssues(latestIssuesMessage);
+              };
+
+              const save = document.createElement("button");
+              save.className = "issue-ignore-save primary";
+              save.type = "button";
+              save.textContent = "保存并重新检查";
+              save.onclick = () => saveIssueIgnoreTerm(issue, input);
+
+              input.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") saveIssueIgnoreTerm(issue, input);
+                if (event.key === "Escape") {
+                  activeIgnoreIssueId = null;
+                  renderIssues(latestIssuesMessage);
+                }
+              });
+
+              editor.append(input, cancel, save);
+              item.appendChild(editor);
+            }
           }
 
           issuesContainer.appendChild(item);

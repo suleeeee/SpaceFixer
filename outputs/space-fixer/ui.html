@@ -12,13 +12,12 @@
         --muted: var(--figma-color-text-secondary);
         --border: var(--figma-color-border);
         --panel: var(--figma-color-bg-secondary);
-        --brand: var(--figma-color-bg-brand);
-        --brand-fg: var(--figma-color-text-onbrand);
+        --brand: #41e9bc;
+        --brand-fg: #000000;
         --danger: var(--figma-color-text-danger);
         --hover: var(--figma-color-bg-hover);
-        --vivo-blue: #415fff;
-        --success: #2cac76;
-        --warning: #f2a133;
+        --success: #087a5e;
+        --warning: #087a5e;
       }
 
       * {
@@ -38,6 +37,7 @@
 
       button,
       textarea,
+      input,
       select {
         font: inherit;
       }
@@ -334,7 +334,7 @@
 
       .issue-filter.is-selected {
         border-color: var(--brand);
-        background: rgba(13, 153, 255, 0.14);
+        background: var(--brand-soft);
         color: var(--fg);
       }
 
@@ -474,7 +474,7 @@
       }
 
       .difference-after {
-        color: var(--vivo-blue);
+        color: var(--brand);
       }
 
       .excerpt {
@@ -496,6 +496,46 @@
       }
 
       .issue-action-locate {
+        border-color: transparent;
+        background: transparent;
+        color: var(--muted);
+      }
+
+      .issue-action-term {
+        border-color: transparent;
+        background: transparent;
+        color: var(--tertiary);
+      }
+
+      .issue-action-term:hover {
+        border-color: transparent;
+        background: var(--panel-secondary);
+        color: var(--muted);
+      }
+
+      .issue-ignore-editor {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        gap: 8px;
+        align-items: center;
+        border-top: 1px solid var(--border);
+        background: var(--panel-secondary);
+        padding: 8px 10px;
+      }
+
+      .issue-ignore-input {
+        width: 100%;
+        min-width: 0;
+        height: 30px;
+      }
+
+      .issue-ignore-save,
+      .issue-ignore-cancel {
+        height: 30px;
+        padding: 0 10px;
+      }
+
+      .issue-ignore-cancel {
         border-color: transparent;
         background: transparent;
         color: var(--muted);
@@ -884,45 +924,29 @@
         display: flex;
         gap: 8px;
         align-items: center;
-        justify-content: flex-end;
-      }
-
-      .whitelist-undo {
-        display: flex;
-        min-height: 36px;
-        align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        background: var(--panel);
-        padding: 6px 8px 6px 10px;
       }
 
-      .whitelist-undo-copy {
-        min-width: 0;
+      #clearWhitelist {
+        margin-left: auto;
+      }
+
+      .whitelist-notice {
         color: var(--muted);
+        font-size: 11px;
+        line-height: 16px;
+        margin-top: -4px;
+        margin-bottom: 6px;
+        user-select: none;
+      }
+
+      #saveStatus {
         overflow: hidden;
+        min-width: 0;
+        font-size: 12px;
+        line-height: 18px;
         text-overflow: ellipsis;
         white-space: nowrap;
-      }
-
-      .whitelist-undo button {
-        height: 28px;
-        flex: none;
-        color: var(--brand);
-        padding: 0 9px;
-      }
-
-      .whitelist-toolbar {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .whitelist-toolbar select {
-        width: 100%;
       }
 
       .whitelist-section {
@@ -1038,33 +1062,32 @@
       }
 
       /*
-       * Apple-inspired interface system:
+       * Spotify-inspired interface system:
        * neutral surfaces, restrained semantic color, and depth through spacing.
        */
       :root {
         color-scheme: light dark;
-        --bg: #f5f5f7;
-        --fg: #1d1d1f;
-        --muted: #6e6e73;
-        --tertiary: #8e8e93;
-        --border: rgba(60, 60, 67, 0.18);
-        --border-strong: rgba(60, 60, 67, 0.3);
+        --bg: #ffffff;
+        --fg: #121212;
+        --muted: #535353;
+        --tertiary: #747474;
+        --border: rgba(18, 18, 18, 0.18);
+        --border-strong: rgba(18, 18, 18, 0.28);
         --panel: #ffffff;
-        --panel-secondary: rgba(118, 118, 128, 0.08);
-        --panel-hover: rgba(118, 118, 128, 0.12);
-        --brand: #0071e3;
-        --brand-hover: #0077ed;
-        --brand-pressed: #0068d1;
-        --brand-soft: rgba(0, 113, 227, 0.1);
-        --brand-fg: #ffffff;
+        --panel-secondary: #f2f3f0;
+        --panel-hover: #f2f3f0;
+        --brand: #41e9bc;
+        --brand-hover: #63f0cb;
+        --brand-pressed: #2bc49c;
+        --brand-soft: #e3faf4;
+        --brand-fg: #000000;
         --danger: #ff3b30;
         --danger-soft: rgba(255, 59, 48, 0.1);
-        --success: #248a3d;
-        --success-soft: rgba(52, 199, 89, 0.1);
-        --warning: #b25000;
-        --warning-soft: rgba(255, 159, 10, 0.12);
+        --success: #087a5e;
+        --success-soft: #e3faf4;
+        --warning: #087a5e;
+        --warning-soft: #e3faf4;
         --hover: var(--panel-hover);
-        --vivo-blue: var(--brand);
         --control-radius: 9px;
         --card-radius: 12px;
         --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -1075,25 +1098,26 @@
 
       @media (prefers-color-scheme: dark) {
         :root {
-          --bg: #1c1c1e;
-          --fg: #f5f5f7;
-          --muted: #aeaeb2;
-          --tertiary: #8e8e93;
-          --border: rgba(84, 84, 88, 0.52);
-          --border-strong: rgba(99, 99, 102, 0.72);
-          --panel: #2c2c2e;
-          --panel-secondary: rgba(118, 118, 128, 0.16);
-          --panel-hover: rgba(118, 118, 128, 0.24);
-          --brand: #0071e3;
-          --brand-hover: #147ce5;
-          --brand-pressed: #0068d1;
-          --brand-soft: rgba(0, 113, 227, 0.14);
+          --bg: #121212;
+          --fg: #ffffff;
+          --muted: #b3b3b3;
+          --tertiary: #747474;
+          --border: rgba(255, 255, 255, 0.16);
+          --border-strong: rgba(255, 255, 255, 0.26);
+          --panel: #181818;
+          --panel-secondary: #242424;
+          --panel-hover: #2a2a2a;
+          --brand: #41e9bc;
+          --brand-hover: #63f0cb;
+          --brand-pressed: #2bc49c;
+          --brand-soft: #19312b;
+          --brand-fg: #000000;
           --danger: #ff453a;
           --danger-soft: rgba(255, 69, 58, 0.16);
-          --success: #30d158;
-          --success-soft: rgba(48, 209, 88, 0.13);
-          --warning: #ffd60a;
-          --warning-soft: rgba(255, 214, 10, 0.12);
+          --success: #7cffdb;
+          --success-soft: #19312b;
+          --warning: #7cffdb;
+          --warning-soft: #19312b;
           --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.18);
           --shadow-modal:
             0 30px 90px rgba(0, 0, 0, 0.56),
@@ -1143,7 +1167,8 @@
       }
 
       .toolbar {
-        gap: 7px;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        gap: 8px;
       }
 
       select,
@@ -1321,8 +1346,8 @@
 
       .issue-filter.is-selected {
         border-color: transparent;
-        background: var(--panel-hover);
-        color: var(--brand);
+        background: var(--brand);
+        color: var(--brand-fg);
       }
 
       .issues {
@@ -1422,7 +1447,7 @@
       }
 
       .empty {
-        min-height: 112px;
+        min-height: 168px;
         border: 0;
         border-radius: var(--card-radius);
         background: var(--panel-secondary);
@@ -1432,7 +1457,7 @@
       .whitelist-section {
         gap: 9px;
         border-top: 1px solid var(--border);
-        padding-top: 6px;
+        padding-top: 10px;
       }
 
       .whitelist-toggle {
@@ -1465,27 +1490,12 @@
       }
 
       .whitelist-content {
-        gap: 10px;
-      }
-
-      .whitelist-undo {
-        border-color: transparent;
-        border-radius: var(--control-radius);
-        background: var(--panel-secondary);
-        box-shadow: none;
-      }
-
-      .whitelist-undo button {
-        border-color: transparent;
-        background: transparent;
-        box-shadow: none;
+        gap: 13px;
       }
 
       .modal-backdrop {
         background: rgba(0, 0, 0, 0.58);
         padding: 16px;
-        -webkit-backdrop-filter: blur(8px);
-        backdrop-filter: blur(8px);
       }
 
       .modal {
@@ -1537,37 +1547,91 @@
       }
 
       #allPreviewOverlay {
+        align-items: flex-start;
         background: rgba(0, 0, 0, 0.72);
+        padding-top: 115px;
       }
 
       .preview-modal {
-        width: min(100%, 360px);
-        border-color: var(--border);
-        background: var(--bg);
+        width: 100%;
+        max-width: 388px;
+        min-height: 530px;
+        max-height: calc(100vh - 130px);
+        gap: 14px;
+        border: 0;
+        border-radius: 16px;
+        background: var(--panel);
+        overflow-y: auto;
+        padding: 16px;
+        box-shadow: none;
       }
 
       .preview-modal .summary-total {
-        background: var(--panel-hover);
+        min-height: 104px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--panel-secondary);
+        padding: 16px 18px;
       }
 
       .preview-modal .summary-item {
-        background: var(--panel);
+        min-height: 126px;
+        justify-content: center;
+        border: 0;
+        border-radius: 12px;
+        background: var(--panel-secondary);
+        padding: 12px;
+      }
+
+      .preview-modal .summary-total::after,
+      .preview-modal .summary-item .summary-eyebrow,
+      .preview-modal .summary-details {
+        display: none;
+      }
+
+      .preview-modal .summary-subgrid {
+        gap: 6px;
+      }
+
+      .preview-modal .summary-metric {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+        margin: 0;
+      }
+
+      .preview-modal .summary-value {
+        font-size: 44px;
+        font-weight: 500;
+      }
+
+      .preview-modal .summary-label {
+        color: var(--fg);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 16px;
+      }
+
+      .preview-modal .preview-note {
+        font-size: 12px;
+        line-height: 18px;
+      }
+
+      .preview-modal .preview-actions {
+        margin-top: 0;
       }
 
       @media (prefers-color-scheme: dark) {
         .preview-modal {
-          border-color: rgba(84, 84, 88, 0.72);
-          background: #1c1c1e;
+          background: var(--panel);
         }
 
         .preview-modal .summary-total {
-          border-color: rgba(99, 99, 102, 0.72);
-          background: #48484a;
+          background: var(--panel-secondary);
         }
 
         .preview-modal .summary-item {
-          border-color: rgba(84, 84, 88, 0.52);
-          background: #2c2c2e;
+          background: var(--panel-secondary);
         }
       }
 
@@ -1582,6 +1646,160 @@
         border-color: transparent;
         background: #e9342b;
       }
+      /* Latest entry screen, Figma 368:660. */
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 18px 0;
+        border: 0;
+      }
+      header .brand-title { display: none; }
+      header p { color: var(--fg); font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: 0; }
+      header .settings-trigger { flex: 0 0 24px; width: 24px; height: 24px; }
+      main { gap: 24px; padding: 24px 18px 14px; }
+      .toolbar { gap: 8px; height: 34px; flex: none; }
+      .toolbar select, .toolbar button { height: 34px; min-height: 34px; }
+      .toolbar button, .toolbar select { border-radius: 8px; }
+      .toolbar #scan, .toolbar #fixAll { border-radius: 999px; }
+      .results-section { min-height: 179px; gap: 7px; margin-top: -8px; }
+      .section-title { height: 22px; min-height: 22px; flex: none; }
+      .result-status { flex: none; }
+      .issues { padding-right: 0; }
+      body:not(.has-results) main { flex: none; }
+      body:not(.has-results) .results-section { height: 179px; min-height: 179px; flex: none; }
+      body:not(.has-results) .issues { min-height: 107px; height: 107px; flex: none; }
+      .issues > .empty {
+        height: 107px;
+        min-height: 107px;
+        flex: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .empty-icon {
+        font-size: 20px;
+        line-height: 1;
+        margin-bottom: 8px;
+        display: block;
+      }
+      .issue-filters { margin-bottom: 7px; flex-shrink: 0; }
+      .issue-filters:not([hidden]) + .issues { margin-top: 7px; }
+      .whitelist-section { border-top: 0; padding-top: 0; }
+      .whitelist-toggle-copy { gap: 12px; }
+      .whitelist-toggle { font-size: 12px; line-height: 18px; }
+      .settings-modal .scan-option-groups {
+        padding: 12px;
+        border-radius: 12px;
+        background: var(--panel-secondary);
+      }
+      .settings-modal .scan-option-group { flex-wrap: wrap; gap: 10px; }
+      .settings-modal .scan-option-heading { width: 100%; flex-basis: 100%; color: var(--fg); font-weight: 600; }
+      .settings-modal .scan-options { display: flex; flex-wrap: wrap; gap: 12px; }
+      /* Light theme, Figma 368:860. */
+      :root {
+        color-scheme: light dark;
+        --bg: #f2f3f0;
+        --fg: #121212;
+        --muted: #535353;
+        --tertiary: #747474;
+        --border: rgba(18, 18, 18, 0.18);
+        --border-strong: rgba(18, 18, 18, 0.28);
+        --panel: #ffffff;
+        --panel-secondary: #e9ece8;
+        --panel-hover: #dfe4df;
+        --brand: #41e9bc;
+        --brand-hover: #63f0cb;
+        --brand-pressed: #2bc49c;
+        --brand-soft: #e3faf4;
+        --brand-fg: #000000;
+        --success: #087a5e;
+        --success-soft: #e3faf4;
+        --warning: #087a5e;
+        --warning-soft: #e3faf4;
+        --danger: #ff3b30;
+        --danger-soft: rgba(255, 59, 48, 0.1);
+        --control-radius: 8px;
+        --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.2), 0 4px 18px rgba(0, 0, 0, 0.08);
+      }
+      header p { font-weight: 500; line-height: 18px; }
+      /* Brand text is darker than the action fill, Figma 368:921. */
+      :root { --brand-text: #0dd6a0; --action-surface: #f5f5f5; }
+      .difference-after, .issue-action-fix { color: var(--brand-text); }
+      .pair { font-size: 12px; line-height: 18px; font-weight: 500; }
+      .difference-arrow { font-weight: 400; }
+      .issue-meta { margin-bottom: 2px; }
+      .issue-kind { font-size: 11px; line-height: 16px; color: var(--muted); }
+      .excerpt { font-size: 11px; line-height: 18px; font-weight: 400; }
+      .issue-actions button { font-size: 11px; line-height: 16px; font-weight: 500; }
+      .issue-action-fix { background: var(--action-surface); }
+      .issue-action-locate, .issue-action-ignore { color: var(--tertiary); }
+      .issue-filter { font-size: 12px; line-height: 18px; font-weight: 500; color: var(--fg); }
+      .issue-head { font-size: 12px; line-height: 18px; font-weight: 400; }
+      .node-layer { font-weight: 500; }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #121212;
+          --fg: #ffffff;
+          --muted: #b3b3b3;
+          --tertiary: #747474;
+          --border: rgba(255, 255, 255, 0.16);
+          --border-strong: rgba(255, 255, 255, 0.26);
+          --panel: #181818;
+          --panel-secondary: #242424;
+          --panel-hover: #2a2a2a;
+          --brand-soft: #19312b;
+          --brand-text: #41e9bc;
+          --action-surface: #242424;
+          --success: #7cffdb;
+          --success-soft: #19312b;
+          --warning: #7cffdb;
+          --warning-soft: #19312b;
+          --danger: #ff453a;
+          --danger-soft: rgba(255, 69, 58, 0.16);
+          --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.18);
+          --shadow-modal: 0 30px 90px rgba(0, 0, 0, 0.56), 0 4px 20px rgba(0, 0, 0, 0.28);
+        }
+      }
+      .issue-action-locate, .issue-action-term { border-color: transparent; background: transparent; color: var(--tertiary); }
+      .issue-action-locate:hover:not(:disabled), .issue-action-term:hover:not(:disabled) { border-color: transparent; background: var(--panel-secondary); color: var(--muted); }
+      .is-advisory .issue-meta { min-width: 0; flex-wrap: nowrap; }
+      .is-advisory .issue-kind { flex: none; white-space: nowrap; }
+      .is-advisory .pair { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .is-advisory .issue-actions { flex: none; }
+      .settings-master-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--fg);
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .settings-divider { background: var(--border); opacity: 0.3; }
+      .settings-master-toggle input[type="checkbox"] {
+        appearance: auto;
+        width: 15px;
+        height: 15px;
+        flex: 0 0 15px;
+        margin: 0;
+        accent-color: var(--brand);
+      }
+      .settings-rule-module > .settings-option,
+      .settings-rule-module > .settings-options-inline,
+      .settings-rule-module > .settings-note { margin-left: 26px; }
+      .settings-rule-module .settings-option input[type="checkbox"] {
+        width: 13px;
+        height: 13px;
+        flex: 0 0 13px;
+        margin: 0;
+        accent-color: #929292;
+      }
+      .settings-rule-module > .settings-divider { margin-left: 26px; }
+      .issue-filters { flex-wrap: wrap; row-gap: 7px; height: auto; }
     </style>
   </head>
   <body>
@@ -1604,7 +1822,7 @@
           <path d="M12.8837 2.97C14.1137 2.97 15.0137 3.555 15.3887 4.71C15.5687 5.265 15.6437 5.775 15.6437 6.75C15.6437 7.725 15.5687 8.235 15.3887 8.79C15.0137 9.945 14.1137 10.53 12.8837 10.53C11.9087 10.53 11.3087 10.17 10.9637 9.675H10.9487V11.505C10.9487 11.565 10.9787 11.595 11.0387 11.595H11.6837C11.7737 11.595 11.8337 11.655 11.8337 11.745V12.915C11.8337 13.005 11.7737 13.065 11.6837 13.065H8.53371C8.44371 13.065 8.38371 13.005 8.38371 12.915V11.745C8.38371 11.655 8.44371 11.595 8.53371 11.595H9.17871C9.23871 11.595 9.26871 11.565 9.26871 11.505V4.695C9.26871 4.635 9.23871 4.605 9.17871 4.605H8.53371C8.44371 4.605 8.38371 4.545 8.38371 4.455V3.285C8.38371 3.195 8.44371 3.135 8.53371 3.135H10.7987C10.8887 3.135 10.9487 3.195 10.9487 3.285V3.825H10.9637C11.3087 3.33 11.9087 2.97 12.8837 2.97ZM12.4487 4.47C11.7587 4.47 11.2937 4.8 11.0987 5.4C10.9937 5.73 10.9487 6.09 10.9487 6.75C10.9487 7.41 10.9937 7.77 11.0987 8.1C11.2937 8.7 11.7587 9.03 12.4487 9.03C13.1237 9.03 13.5887 8.7 13.7837 8.1C13.8887 7.77 13.9337 7.41 13.9337 6.75C13.9337 6.09 13.8887 5.73 13.7837 5.4C13.5887 4.8 13.1237 4.47 12.4487 4.47Z" fill="currentColor"/>
           <path d="M3.57 0C4.68 0 5.82 0.315001 6.57 0.720001C6.66 0.765 6.675 0.825 6.675 0.9V2.895C6.675 2.985 6.615 3.045 6.525 3.045H5.205C5.115 3.045 5.055 2.985 5.055 2.895V1.98C5.055 1.905 5.04 1.875 4.965 1.845C4.545 1.68 4.08 1.575 3.465 1.575C2.34 1.575 1.8 2.1 1.8 2.895C1.8 3.645 2.235 4.125 3.645 4.32L4.185 4.395C6.15 4.665 7.23 5.655 7.23 7.41C7.23 9.255 5.97 10.53 3.435 10.53C2.19 10.53 1.095 10.26 0.105 9.72C0.0449999 9.69 0 9.63 0 9.54V7.5C0 7.41 0.0600001 7.35 0.15 7.35H1.53C1.62 7.35 1.68 7.41 1.68 7.5V8.505C1.68 8.565 1.71 8.595 1.755 8.61C2.355 8.835 2.91 8.955 3.525 8.955C4.74 8.955 5.445 8.415 5.445 7.485C5.445 6.75 4.995 6.24 3.585 6.045L3.045 5.97C1.08 5.7 0 4.785 0 3C0 1.095 1.335 0 3.57 0Z" fill="currentColor"/>
           </svg>
-        <p>检查中文、英文、数字与标点之间的空格问题，并按中文排版规则修正。</p>
+        <p>检查并修正文案中的排版问题。</p>
       </header>
 
       <main>
@@ -1670,7 +1888,10 @@
             </button>
           </div>
           <div id="issues" class="issues">
-            <div class="empty">点击“检查”开始扫描。</div>
+            <div class="empty">
+              <span class="empty-icon">✨</span>
+              <div>选择范围后点击「检查」排查问题</div>
+            </div>
           </div>
         </section>
 
@@ -1683,8 +1904,8 @@
             aria-controls="whitelistContent"
           >
             <span class="whitelist-toggle-copy">
-              <strong>术语规则（白名单）</strong>
-              <span id="whitelistSummary" class="whitelist-summary">文件 0 条 · 个人 0 条</span>
+              <strong>专有名词保护</strong>
+              <span id="whitelistSummary" class="whitelist-summary">已保护 0 个词条</span>
             </span>
             <span class="whitelist-chevron" aria-hidden="true">
               <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
@@ -1693,24 +1914,17 @@
             </span>
           </button>
           <div id="whitelistContent" class="whitelist-content" hidden>
-            <div class="whitelist-toolbar">
-              <select id="whitelistTarget" title="术语规则范围">
-                <option value="file">当前文件共享</option>
-                <option value="personal">仅我使用</option>
-              </select>
-              <span id="saveStatus" class="count">已保存</span>
+            <div class="whitelist-notice">
+              保护专有名词（如 ChatGPT、iPhone）不被误改或拆分空格，随当前文件保存并全员共用。
             </div>
             <textarea
               id="whitelist"
               spellcheck="false"
-              placeholder="每行一个术语&#10;蓝心小V&#10;小V圈搜&#10;iQOO 智能双面夹5 Pro"
+              placeholder="每行一个专有名词（每行一条）：&#10;ChatGPT&#10;iPhone&#10;蓝心小V&#10;iQOO 智能双面夹5 Pro"
             ></textarea>
             <div class="whitelist-actions">
-              <button id="clearWhitelist">清空当前</button>
-            </div>
-            <div id="whitelistUndo" class="whitelist-undo" hidden>
-              <span id="whitelistUndoText" class="whitelist-undo-copy"></span>
-              <button id="undoClearWhitelist">撤销</button>
+              <span id="saveStatus" class="count" hidden></span>
+              <button id="clearWhitelist">清空词条</button>
             </div>
           </div>
         </section>
@@ -1730,7 +1944,7 @@
     </div>
     <div id="clearWhitelistOverlay" class="modal-backdrop" hidden>
       <section class="modal" role="dialog" aria-modal="true" aria-labelledby="clearWhitelistTitle">
-        <h2 id="clearWhitelistTitle">清空术语规则？</h2>
+        <h2 id="clearWhitelistTitle">清空专有名词？</h2>
         <p id="clearWhitelistDescription" class="confirm-description"></p>
         <div class="preview-actions">
           <button id="cancelClearWhitelist">取消</button>
@@ -1812,7 +2026,7 @@
               <input id="removeNumberSpaces" type="checkbox" />
               <span>删除数字与数字之间空格（谨慎使用）</span>
             </label>
-            <p class="settings-note">* 建议结合<strong>术语规则</strong>使用，仅适用于中文排版。</p>
+            <p class="settings-note">* 建议结合<strong>专有名词保护</strong>使用，仅适用于中文排版。</p>
           </section>
         </div>
         <div class="preview-actions">
@@ -1845,21 +2059,31 @@
       const resetCleanupRulesButton = document.getElementById("resetCleanupRules");
       const extraSpaceWarning = document.getElementById("extraSpaceWarning");
       const clearWhitelistButton = document.getElementById("clearWhitelist");
-      const whitelistTarget = document.getElementById("whitelistTarget");
       const whitelistInput = document.getElementById("whitelist");
       const issuesContainer = document.getElementById("issues");
       const count = document.getElementById("count");
       const resultStatus = document.getElementById("resultStatus");
       const resultStatusText = document.getElementById("resultStatusText");
       const issueFilters = document.getElementById("issueFilters");
+      const auditFilterLabels = {
+        "orphan-line": "末行孤字",
+        punctuation: "标点",
+        placeholder: "占位文案"
+      };
+      for (const [type, label] of Object.entries(auditFilterLabels)) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "issue-filter";
+        button.dataset.filter = type;
+        button.textContent = label + " 0";
+        issueFilters.appendChild(button);
+      }
+      issueFilters.appendChild(issueFilters.querySelector('[data-filter="term-format"]'));
       const issueFilterButtons = Array.from(issueFilters.querySelectorAll(".issue-filter"));
       const saveStatus = document.getElementById("saveStatus");
       const whitelistToggle = document.getElementById("whitelistToggle");
       const whitelistContent = document.getElementById("whitelistContent");
       const whitelistSummary = document.getElementById("whitelistSummary");
-      const whitelistUndo = document.getElementById("whitelistUndo");
-      const whitelistUndoText = document.getElementById("whitelistUndoText");
-      const undoClearWhitelistButton = document.getElementById("undoClearWhitelist");
       const allPreviewOverlay = document.getElementById("allPreviewOverlay");
       const allPreviewDescription = document.getElementById("allPreviewDescription");
       const allPreviewSummary = document.getElementById("allPreviewSummary");
@@ -1872,6 +2096,7 @@
       const settingsOverlay = document.getElementById("settingsOverlay");
       const closeSettingsButton = document.getElementById("closeSettings");
       let issues = [];
+      const ignoredAuditIssueIds = new Set();
       let whitelistSaveTimer = null;
       let whitelistDirty = false;
       let whitelistSaveRequestId = 0;
@@ -1884,9 +2109,8 @@
       let latestIssuesMessage = null;
       let isBusy = false;
       let resultsStale = false;
-      let whitelistToggleLocked = false;
+      let activeIgnoreIssueId = null;
       let pendingWhitelistAction = null;
-      let lastClearedWhitelist = null;
       let fixAllPreviewTimer = null;
       let whitelists = {
         file: [],
@@ -1894,12 +2118,56 @@
       };
       let activeWhitelistTarget = "file";
 
+      // Match the compact entry screen; retain the existing rule handlers.
+      document.querySelector("header").appendChild(openSettingsButton);
+      for (const [input, title] of [
+        [addMissingSpacesInput, "补充缺失空格"],
+        [removeExtraSpacesInput, "清理多余空格"]
+      ]) {
+        const heading = Array.from(document.querySelectorAll(".settings-section-head"))
+          .find(element => element.textContent.trim() === title);
+        const label = document.createElement("label");
+        label.className = "settings-master-toggle";
+        label.append(input, document.createTextNode(title));
+        heading.replaceChildren(label);
+        heading.closest(".settings-section").classList.add("settings-rule-module");
+      }
+      addMissingSpacesInput.checked = true;
+      removeExtraSpacesInput.checked = true;
+      document.querySelector(".scan-option-groups").remove();
+
+      const copyAuditSettings = document.createElement("section");
+      copyAuditSettings.className = "settings-section";
+      copyAuditSettings.classList.add("settings-rule-module");
+      copyAuditSettings.innerHTML = '<label class="settings-master-toggle"><input id="auditMaster" type="checkbox" checked><span>文案与排版检查（提示与定位）</span></label>';
+      for (const [id, label] of [
+        ["auditPunctuation", "中文标点与重复标点"],
+        ["auditPlaceholder", "占位文案"],
+        ["auditOrphan", "末行孤字（排除末尾标点）"]
+      ]) {
+        const row = document.createElement("label");
+        row.className = "settings-option";
+        row.innerHTML = '<input type="checkbox" checked id="' + id + '"><span>' + label + '</span>';
+        row.querySelector("input").onchange = () => markResultsStale("检查项已更改，请重新检查。");
+        copyAuditSettings.appendChild(row);
+      }
+      document.querySelector(".settings-sections").appendChild(copyAuditSettings);
+      document.getElementById("auditMaster").onchange = (event) => {
+        for (const input of copyAuditSettings.querySelectorAll(".settings-option input")) {
+          input.disabled = !event.target.checked;
+        }
+        markResultsStale("检查项已更改，请重新检查。");
+      };
       scanButton.onclick = () => {
         setBusy(true, "正在扫描文本图层...");
         parent.postMessage({ pluginMessage: getRequest("scan") }, "*");
       };
 
       fixAllButton.onclick = () => {
+        if (!issues.some(issue => !issue.advisory)) {
+          setResultStatus("warning", "当前仅有需人工核对的提示，请点击定位查看。");
+          return;
+        }
         if (resultsStale) return;
         setBusy(true, "正在生成全部修复预览...");
         window.clearTimeout(fixAllPreviewTimer);
@@ -1967,7 +2235,12 @@
 
       resetCleanupRulesButton.addEventListener("click", () => {
         addMissingSpacesInput.checked = true;
-        removeExtraSpacesInput.checked = false;
+        removeExtraSpacesInput.checked = true;
+        document.getElementById("auditMaster").checked = true;
+        for (const input of copyAuditSettings.querySelectorAll(".settings-option input")) {
+          input.checked = true;
+          input.disabled = false;
+        }
         extraSpaceWarning.hidden = true;
         ignoreHiddenInput.checked = true;
         excludeScriptSpacesInput.checked = true;
@@ -1995,16 +2268,26 @@
       settingsOverlay.onclick = (event) => {
         if (event.target === settingsOverlay) closeSettings();
       };
+      allPreviewOverlay.onclick = (event) => {
+        if (event.target === allPreviewOverlay) closeFixAllPreview();
+      };
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          if (!allPreviewOverlay.hidden) {
+            closeFixAllPreview();
+          } else if (!settingsOverlay.hidden) {
+            closeSettings();
+          } else if (!clearWhitelistOverlay.hidden) {
+            closeClearWhitelistConfirm();
+          }
+        }
+      });
 
       whitelistToggle.onclick = toggleWhitelist;
 
       function toggleWhitelist() {
-        if (whitelistToggleLocked) return;
-        whitelistToggleLocked = true;
         setWhitelistExpanded(!isWhitelistExpanded());
-        window.setTimeout(() => {
-          whitelistToggleLocked = false;
-        }, 140);
       }
 
       cancelFixAllButton.onclick = () => {
@@ -2017,11 +2300,72 @@
       };
 
       function requestIssueFix(issue) {
-        if (resultsStale) return;
+        if (isBusy || resultsStale) return;
         setBusy(true, "正在修复当前问题...");
         const request = getRequest("fix-one");
         request.id = issue.id;
         parent.postMessage({ pluginMessage: request }, "*");
+      }
+
+      function openIssueIgnoreEditor(issue) {
+        if (resultsStale || isBusy) return;
+        activeIgnoreIssueId = activeIgnoreIssueId === issue.id ? null : issue.id;
+        renderIssues(latestIssuesMessage);
+        if (activeIgnoreIssueId) {
+          window.requestAnimationFrame(() => {
+            const input = issuesContainer.querySelector(".issue-ignore-input");
+            if (input) {
+              input.focus();
+              input.select();
+            }
+          });
+        }
+      }
+
+      function saveIssueIgnoreTerm(issue, input) {
+        if (resultsStale || isBusy || !input) return;
+        const term = input.value.trim();
+        if (!term) {
+          input.focus();
+          return;
+        }
+
+        const target = "file";
+        const sourceItems = getWhitelistInputItems();
+        const seenItems = new Set(sourceItems.map((item) => item.trim()));
+
+        if (seenItems.has(term)) {
+          activeIgnoreIssueId = null;
+          renderIssues(latestIssuesMessage);
+          setBusy(true, "该词条已在保护列表中，正在重新检查...");
+          parent.postMessage({ pluginMessage: getRequest("scan") }, "*");
+          return;
+        }
+
+        const nextItems = [...sourceItems, term];
+
+        window.clearTimeout(whitelistSaveTimer);
+        whitelistInput.value = nextItems.join("\n");
+        whitelistDirty = false;
+        updateClearWhitelistButton();
+        setWhitelistSaveStatus("保存中");
+
+        const requestId = saveWhitelistItems(target, nextItems);
+        pendingWhitelistAction = {
+          type: "ignore",
+          requestId,
+          target,
+          term
+        };
+        setWhitelistActionBusy(true);
+        setBusy(true, "正在保存专有名词...");
+      }
+
+      function getIssueWhitelistTerm(issue) {
+        if (issue.type === "missing-space") return (issue.pair || "").trim();
+        if (issue.type === "term-format") return (issue.actual || issue.term || "").trim();
+        if (isExtraSpaceIssueType(issue.type)) return (issue.actual || issue.beforeDifference || "").trim();
+        return "";
       }
 
       function openFixAllPreview() {
@@ -2043,6 +2387,9 @@
         const shouldRemoveScriptSpaces =
           shouldExcludeScriptSpaces && removeScriptSpacesInput.checked;
         return {
+          auditPunctuation: document.getElementById("auditMaster").checked && document.getElementById("auditPunctuation").checked,
+          auditPlaceholder: document.getElementById("auditMaster").checked && document.getElementById("auditPlaceholder").checked,
+          auditOrphan: document.getElementById("auditMaster").checked && document.getElementById("auditOrphan").checked,
           type,
           scope: scope.value,
           addMissingSpaces: addMissingSpacesInput.checked,
@@ -2072,17 +2419,42 @@
 
       function setWhitelistExpanded(isExpanded) {
         whitelistToggle.setAttribute("aria-expanded", String(isExpanded));
-        whitelistContent.hidden = !isExpanded;
-        requestUiResize(isExpanded || issues.length > 0);
+        if (isExpanded) {
+          requestUiResize(true);
+          window.requestAnimationFrame(() => {
+            whitelistContent.hidden = false;
+            scheduleContentResize();
+          });
+          return;
+        }
+        whitelistContent.hidden = true;
+        requestUiResize(issues.length > 0);
       }
 
       function requestUiResize(expanded) {
+        scheduleContentResize();
+        const expandedHeight =
+          expanded && isWhitelistExpanded() && issues.length === 0
+            ? "whitelist-empty"
+            : "workspace";
         parent.postMessage({
           pluginMessage: {
             type: "resize-ui",
-            expanded
+            expanded,
+            expandedHeight
           }
         }, "*");
+      }
+
+      function scheduleContentResize() {
+        window.requestAnimationFrame(() => {
+          if (issues.length || !settingsOverlay.hidden || !allPreviewOverlay.hidden) return;
+          const headerHeight = document.querySelector("header").getBoundingClientRect().height;
+          const mainHeight = document.querySelector("main").getBoundingClientRect().height;
+          parent.postMessage({
+            pluginMessage: { type: "resize-ui", contentHeight: Math.ceil(headerHeight + mainHeight) }
+          }, "*");
+        });
       }
 
       function setBusy(nextBusy, message) {
@@ -2216,15 +2588,9 @@
       }
 
       whitelistInput.addEventListener("input", () => {
-        if (
-          lastClearedWhitelist &&
-          lastClearedWhitelist.target === activeWhitelistTarget
-        ) {
-          clearWhitelistUndo();
-        }
         updateClearWhitelistButton();
         whitelistDirty = true;
-        saveStatus.textContent = "正在输入";
+        setWhitelistSaveStatus("正在输入...");
         window.clearTimeout(whitelistSaveTimer);
         whitelistSaveTimer = window.setTimeout(saveWhitelist, 500);
       });
@@ -2238,21 +2604,10 @@
         saveWhitelist();
       });
 
-      whitelistTarget.addEventListener("change", () => {
-        window.clearTimeout(whitelistSaveTimer);
-        if (whitelistDirty) saveWhitelist(activeWhitelistTarget);
-        activeWhitelistTarget = whitelistTarget.value;
-        renderWhitelist();
-      });
-
       clearWhitelistButton.onclick = () => {
         const items = getWhitelistInputItems();
         if (!items.length) return;
-        const target = whitelistTarget.value;
-        const targetLabel = getWhitelistTargetLabel(target);
-        clearWhitelistDescription.textContent = target === "file"
-          ? `将删除${targetLabel}中的 ${items.length} 个术语，并影响同一文件中有编辑权限的成员。清空后可以撤销。`
-          : `将删除${targetLabel}中的 ${items.length} 个术语。清空后可以撤销。`;
+        clearWhitelistDescription.textContent = `将移除当前文件中的全部 ${items.length} 个专有名词保护，该文件所有成员将不再忽略这些词条。`;
         clearWhitelistOverlay.hidden = false;
         document.body.classList.add("modal-open");
         confirmClearWhitelistButton.focus();
@@ -2265,7 +2620,7 @@
       };
 
       confirmClearWhitelistButton.onclick = () => {
-        const target = whitelistTarget.value;
+        const target = "file";
         const items = getWhitelistInputItems();
         closeClearWhitelistConfirm();
         if (!items.length) return;
@@ -2273,7 +2628,7 @@
         window.clearTimeout(whitelistSaveTimer);
         whitelistDirty = false;
         whitelistInput.value = "";
-        saveStatus.textContent = "清空中";
+        setWhitelistSaveStatus("清空中");
         const requestId = createWhitelistRequestId(target);
         pendingWhitelistAction = {
           type: "clear",
@@ -2287,28 +2642,6 @@
             type: "clear-whitelist",
             requestId,
             target
-          }
-        }, "*");
-      };
-
-      undoClearWhitelistButton.onclick = () => {
-        if (!lastClearedWhitelist) return;
-        const snapshot = lastClearedWhitelist;
-        saveStatus.textContent = "恢复中";
-        const requestId = createWhitelistRequestId(snapshot.target);
-        pendingWhitelistAction = {
-          type: "undo",
-          requestId,
-          target: snapshot.target,
-          items: snapshot.items.slice()
-        };
-        setWhitelistActionBusy(true);
-        parent.postMessage({
-          pluginMessage: {
-            type: "save-whitelist",
-            requestId,
-            target: snapshot.target,
-            items: snapshot.items.slice()
           }
         }, "*");
       };
@@ -2335,32 +2668,9 @@
         return uniqueItems;
       }
 
-      function getWhitelistTargetLabel(target) {
-        return target === "file" ? "当前文件共享术语规则" : "个人术语规则";
-      }
-
-      function showWhitelistUndo(snapshot) {
-        lastClearedWhitelist = {
-          target: snapshot.target,
-          items: snapshot.items.slice()
-        };
-        whitelistUndoText.textContent =
-          `已清空${getWhitelistTargetLabel(snapshot.target)}（${snapshot.items.length} 条）`;
-        undoClearWhitelistButton.disabled = false;
-        whitelistUndo.hidden = false;
-      }
-
-      function clearWhitelistUndo() {
-        lastClearedWhitelist = null;
-        whitelistUndo.hidden = true;
-        undoClearWhitelistButton.disabled = false;
-      }
-
       function setWhitelistActionBusy(isActionBusy) {
-        whitelistTarget.disabled = isActionBusy;
         whitelistInput.disabled = isActionBusy;
         clearWhitelistButton.disabled = isActionBusy || getWhitelistInputItems().length === 0;
-        undoClearWhitelistButton.disabled = isActionBusy;
       }
 
       function updateClearWhitelistButton() {
@@ -2371,16 +2681,21 @@
       function saveWhitelist(target = activeWhitelistTarget) {
         if (!whitelistDirty) return;
         whitelistDirty = false;
-        saveStatus.textContent = "保存中";
+        setWhitelistSaveStatus("保存中");
+        saveWhitelistItems(target, getWhitelistInputItems());
+      }
+
+      function saveWhitelistItems(target, items) {
         const requestId = createWhitelistRequestId(target);
         parent.postMessage({
           pluginMessage: {
             type: "save-whitelist",
             requestId,
             target,
-            items: getWhitelistInputItems()
+            items
           }
         }, "*");
+        return requestId;
       }
 
       function createWhitelistRequestId(target) {
@@ -2395,33 +2710,36 @@
       }
 
       function renderWhitelist() {
-        const target = whitelistTarget.value;
+        const target = "file";
         activeWhitelistTarget = target;
-        whitelistInput.value = whitelists[target].join("\n");
+        whitelistInput.value = (whitelists.file || []).join("\n");
         whitelistInput.disabled = false;
         whitelistDirty = false;
         updateClearWhitelistButton();
-        updateWhitelistSaveStatus(target);
+        clearWhitelistSaveStatus();
         renderWhitelistSummary();
         initializeWhitelistVisibility();
       }
 
-      function updateWhitelistSaveStatus(target) {
-        saveStatus.textContent = "已保存";
-        saveStatus.title = target === "file"
-          ? "有编辑权限的成员均可共享"
-          : "仅保存在本地";
+      function setWhitelistSaveStatus(message) {
+        saveStatus.textContent = message;
+        saveStatus.hidden = false;
+      }
+
+      function clearWhitelistSaveStatus() {
+        saveStatus.textContent = "";
+        saveStatus.hidden = true;
       }
 
       function renderWhitelistSummary() {
-        whitelistSummary.textContent = `文件 ${whitelists.file.length} 条 · 个人 ${whitelists.personal.length} 条`;
+        const count = whitelists.file ? whitelists.file.length : 0;
+        whitelistSummary.textContent = `已保护 ${count} 个词条`;
       }
 
       function initializeWhitelistVisibility() {
         if (hasInitializedWhitelistVisibility) return;
         hasInitializedWhitelistVisibility = true;
-        const hasAnyTerms = whitelists.file.length + whitelists.personal.length > 0;
-        if (!hasAnyTerms) setWhitelistExpanded(true);
+        setWhitelistExpanded(false);
       }
 
       window.onmessage = (event) => {
@@ -2470,27 +2788,26 @@
             whitelists.personal = message.personalWhitelist;
           }
           renderWhitelistSummary();
+          let completedWhitelistAction = null;
           if (
             pendingWhitelistAction &&
             pendingWhitelistAction.requestId === message.requestId
           ) {
-            const completedAction = pendingWhitelistAction;
-            if (completedAction.type === "clear") {
-              showWhitelistUndo(completedAction);
-            } else if (completedAction.type === "undo") {
-              clearWhitelistUndo();
-              if (completedAction.target === whitelistTarget.value) {
-                whitelistInput.value = completedAction.items.join("\n");
-                whitelistDirty = false;
-              }
-            }
+            completedWhitelistAction = pendingWhitelistAction;
             pendingWhitelistAction = null;
             setWhitelistActionBusy(false);
           }
-          if (message.target === whitelistTarget.value) {
-            updateWhitelistSaveStatus(message.target);
+          if (message.target === "file") {
+            setWhitelistSaveStatus("已保存");
           }
-          markResultsStale("术语规则已更新，请重新检查。");
+          if (completedWhitelistAction && completedWhitelistAction.type === "ignore") {
+            activeIgnoreIssueId = null;
+            renderIssues(latestIssuesMessage);
+            setBusy(true, `已将「${completedWhitelistAction.term}」加入专有名词保护，正在重新检查...`);
+            parent.postMessage({ pluginMessage: getRequest("scan") }, "*");
+            return;
+          }
+          markResultsStale("专有名词保护已更新，请重新检查。");
         }
 
         if (message.type === "whitelist-save-failed") {
@@ -2503,25 +2820,35 @@
             const failedAction = pendingWhitelistAction;
             if (
               failedAction.type === "clear" &&
-              failedAction.target === whitelistTarget.value
+              failedAction.target === "file"
             ) {
               whitelistInput.value = failedAction.items.join("\n");
             }
             pendingWhitelistAction = null;
             setWhitelistActionBusy(false);
             whitelistDirty = false;
+            if (failedAction.type === "ignore") {
+              if (failedAction.target === "file") {
+                whitelistInput.value = (whitelists.file || []).join("\n");
+                updateClearWhitelistButton();
+              }
+              setBusy(false);
+              setResultStatus("failure", "专有名词保存失败，请重试。");
+            }
           } else {
             whitelistDirty = true;
           }
-          saveStatus.textContent = "保存失败";
+          setWhitelistSaveStatus("保存失败");
         }
       };
 
       function renderIssues(message) {
+        issues = issues.filter(issue => !ignoredAuditIssueIds.has(issue.id));
         ensureActiveIssueFilter();
         const visibleIssues = getVisibleIssues();
         const groups = groupIssuesByNode(visibleIssues);
         const allGroups = groupIssuesByNode(issues);
+        document.body.classList.toggle("has-results", issues.length > 0);
         count.textContent = visibleIssues.length
           ? activeIssueFilter === "all"
             ? `${visibleIssues.length} 处 · ${groups.length} 个图层`
@@ -2558,9 +2885,9 @@
           if (message && message.status === "failure") {
             empty.textContent = "检查未完成，请重试。";
           } else if (message && message.emptyReason === "no-selection") {
-            empty.textContent = "选择内容后再次点击“检查”。";
+            empty.innerHTML = '<span class="empty-icon">✨</span><div>选择内容后再次点击“检查”。</div>';
           } else {
-            empty.textContent = "当前扫描范围没有发现间距问题。";
+            empty.innerHTML = '<span class="empty-icon">✨</span><div>当前扫描范围没有发现间距问题。</div>';
           }
           issuesContainer.appendChild(empty);
           requestUiResize(isWhitelistExpanded());
@@ -2570,11 +2897,12 @@
           if (!visibleIssues.length) {
             const empty = document.createElement("div");
             empty.className = "empty";
-            empty.textContent = activeIssueFilter === "missing-space"
+            const text = activeIssueFilter === "missing-space"
               ? "没有缺少空格的问题。"
               : activeIssueFilter === "extra-space"
                 ? "没有多余空格问题。"
               : "没有术语格式问题。";
+            empty.innerHTML = `<span class="empty-icon">✨</span><div>${text}</div>`;
             issuesContainer.appendChild(empty);
             requestUiResize(true);
             return;
@@ -2619,7 +2947,7 @@
 
           for (const issue of group.issues) {
             const row = document.createElement("div");
-            row.className = "issue-row";
+            row.className = issue.advisory ? "issue-row is-advisory" : "issue-row";
 
             const copy = document.createElement("div");
             copy.className = "issue-copy";
@@ -2654,25 +2982,83 @@
             const select = document.createElement("button");
             select.className = "issue-action-locate";
             select.textContent = "定位";
-            select.onclick = () => parent.postMessage({
-              pluginMessage: {
-                type: "select-issue",
-                id: issue.id
-              }
-            }, "*");
+            select.disabled = isBusy;
+            select.onclick = () => {
+              if (isBusy) return;
+              parent.postMessage({
+                pluginMessage: {
+                  type: "select-issue",
+                  id: issue.id
+                }
+              }, "*");
+            };
+
+            const addTerm = document.createElement("button");
+            addTerm.className = "issue-action-term";
+            addTerm.textContent = "忽略";
+            addTerm.disabled = isBusy || resultsStale || !getIssueWhitelistTerm(issue);
+            if (issue.advisory) {
+              addTerm.disabled = isBusy || resultsStale;
+              addTerm.title = "本次忽略此提示，不加入术语库";
+            }
+            if (resultsStale) addTerm.title = "请先按当前条件重新检查";
+            addTerm.onclick = () => openIssueIgnoreEditor(issue);
 
             const fix = document.createElement("button");
             fix.className = "issue-action-fix";
             fix.textContent = "修复";
-            fix.disabled = resultsStale;
+            fix.disabled = isBusy || resultsStale || issue.advisory;
+            if (issue.advisory) { fix.hidden = true; arrow.hidden = true; after.hidden = true; }
             if (resultsStale) fix.title = "请先按当前条件重新检查";
             fix.onclick = () => requestIssueFix(issue);
 
             meta.append(kind, pair, arrow, after);
             copy.append(meta, excerpt);
-            actions.append(select, fix);
+            if (issue.advisory) addTerm.onclick = () => {
+              ignoredAuditIssueIds.add(issue.id);
+              renderIssues(latestIssuesMessage);
+            };
+            actions.append(addTerm, select, fix);
             row.append(copy, actions);
             item.appendChild(row);
+
+            if (activeIgnoreIssueId === issue.id) {
+              const editor = document.createElement("div");
+              editor.className = "issue-ignore-editor";
+
+              const input = document.createElement("input");
+              input.className = "issue-ignore-input";
+              input.type = "text";
+              input.value = getIssueWhitelistTerm(issue);
+              input.placeholder = "输入要保护的专有名词";
+              input.setAttribute("aria-label", "要加入保护列表的专有名词");
+
+              const cancel = document.createElement("button");
+              cancel.className = "issue-ignore-cancel";
+              cancel.type = "button";
+              cancel.textContent = "取消";
+              cancel.onclick = () => {
+                activeIgnoreIssueId = null;
+                renderIssues(latestIssuesMessage);
+              };
+
+              const save = document.createElement("button");
+              save.className = "issue-ignore-save primary";
+              save.type = "button";
+              save.textContent = "保存并重新检查";
+              save.onclick = () => saveIssueIgnoreTerm(issue, input);
+
+              input.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") saveIssueIgnoreTerm(issue, input);
+                if (event.key === "Escape") {
+                  activeIgnoreIssueId = null;
+                  renderIssues(latestIssuesMessage);
+                }
+              });
+
+              editor.append(input, cancel, save);
+              item.appendChild(editor);
+            }
           }
 
           issuesContainer.appendChild(item);
@@ -2711,6 +3097,14 @@
 
         for (const button of issueFilterButtons) {
           const filter = button.dataset.filter || "all";
+          if (auditFilterLabels[filter]) {
+            const total = issues.filter(issue => issue.type === filter).length;
+            button.textContent = auditFilterLabels[filter] + " " + total;
+            button.disabled = total === 0;
+            button.classList.toggle("is-selected", filter === activeIssueFilter);
+            button.setAttribute("aria-pressed", String(filter === activeIssueFilter));
+            continue;
+          }
           if (filter === "term-format") {
             button.textContent = `术语格式 ${termFormatCount}`;
           } else {
@@ -2736,6 +3130,8 @@
       }
 
       function getIssueKindLabel(type) {
+        const labels = { punctuation: "标点", placeholder: "占位文案", "orphan-line": "末行孤字" };
+        if (labels[type]) return labels[type];
         if (type === "term-format") return "术语格式";
         if (type === "line-edge-extra-space") return "行首尾空格";
         if (type === "cjk-extra-space") return "中文间空格";
@@ -2843,7 +3239,7 @@
             label: "术语格式",
             value: preview.termFormatIssues,
             details: preview.termFormatIssues
-              ? [[preview.termFormatIssues, "按术语规则校正"]]
+              ? [[preview.termFormatIssues, "按专有名词规范校正"]]
               : []
           }
         ];

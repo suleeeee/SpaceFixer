@@ -26,7 +26,7 @@ const PERSONAL_STORAGE_KEY = "text-spacing-linter-personal-whitelist-v2";
 const FILE_STORAGE_KEY = "text-spacing-linter-file-whitelist-v2";
 const STORAGE_NAMESPACE = "textSpacingLinter";
 const UI_WIDTH = 420;
-const UI_COMPACT_HEIGHT = 520;
+const UI_COMPACT_HEIGHT = 367;
 const UI_WHITELIST_EMPTY_HEIGHT = 720;
 const UI_WORKSPACE_HEIGHT = 760;
 
@@ -74,7 +74,7 @@ async function init() {
   } catch (error) {
     personalWhitelist = [];
     fileWhitelist = [];
-    figma.notify("术语规则读取失败，已使用空规则启动");
+    figma.notify("专有名词保护读取失败，已使用空规则启动");
   }
 
   postState();
@@ -201,6 +201,10 @@ figma.ui.onmessage = async (message) => {
   }
 
   if (message.type === "resize-ui") {
+    if (Number.isFinite(message.contentHeight)) {
+      resizePlugin(Math.max(260, Math.min(UI_WORKSPACE_HEIGHT, message.contentHeight)));
+      return;
+    }
     const nextHeight = message.expanded
       ? message.expandedHeight === "whitelist-empty"
         ? UI_WHITELIST_EMPTY_HEIGHT
@@ -224,7 +228,7 @@ figma.ui.onmessage = async (message) => {
       postWhitelistSaved(message.requestId, target);
     } catch (error) {
       postWhitelistSaveFailed(message.requestId, message.target);
-      figma.notify("术语规则保存失败，请重试");
+      figma.notify("专有名词保存失败，请重试");
     }
     return;
   }
@@ -240,10 +244,10 @@ figma.ui.onmessage = async (message) => {
         fileWhitelist = [];
       }
       postWhitelistSaved(message.requestId, target);
-      figma.notify(target === "file" ? "当前文件共享术语规则已清空" : "个人术语规则已清空");
+      figma.notify("专有名词保护已清空");
     } catch (error) {
       postWhitelistSaveFailed(message.requestId, message.target);
-      figma.notify("术语规则清空失败，请重试");
+      figma.notify("专有名词清空失败，请重试");
     }
     return;
   }
@@ -269,6 +273,9 @@ function getScanOptions(message) {
   const removeScriptSpaces = excludeScriptSpaces && message.removeScriptSpaces !== false;
   const ignoreScripts = excludeScriptSpaces;
   return {
+    auditPunctuation: message.auditPunctuation !== false,
+    auditPlaceholder: message.auditPlaceholder !== false,
+    auditOrphan: message.auditOrphan !== false,
     addMissingSpaces: message.addMissingSpaces !== false,
     addCjkLatinSpaces: message.addCjkLatinSpaces !== false,
     addCjkNumberSpaces: message.addCjkNumberSpaces !== false,
@@ -419,6 +426,7 @@ function postFixAllPreview(preview) {
 }
 
 function buildFixAllPreview(issues) {
+  issues = issues.filter(issue => !issue.advisory);
   const nodeCount = new Set(issues.map((issue) => issue.nodeId)).size;
   const breakdown = {
     missingCjkLatin: 0,
@@ -537,8 +545,13 @@ async function scanTextNodes(scope, options = scanOptions) {
   const issues = [];
   const termRules = getEffectiveWhitelist();
 
-  for (const node of nodes) {
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
     issues.push.apply(issues, getIssuesForTextNode(node, options, termRules));
+    issues.push.apply(issues, await auditCopyNode(node, options));
+    if (i > 0 && i % 60 === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
   }
 
   lastScanStats = {
@@ -581,6 +594,73 @@ function getIssuesForTextNode(node, options = scanOptions, termRules = getEffect
       excerpt
     };
   });
+}
+
+function makeCopyIssue(node, type, start, end, description) {
+  const page = getPageForNode(node);
+  return { id: `${node.id}:${type}:${start}`, nodeId: node.id, nodeName: node.name,
+    pageId: page ? page.id : figma.currentPage.id, pageName: page ? page.name : figma.currentPage.name,
+    type, index: start, start, end, pair: node.characters.slice(start, end),
+    beforeDifference: node.characters.slice(start, end), excerpt: description, advisory: true };
+}
+
+async function auditCopyNode(node, options) {
+  const text = node.characters;
+  const found = [];
+  const add = (type, match, description) => found.push(makeCopyIssue(node, type, match.index, match.index + match[0].length, description));
+  if (options.auditPunctuation !== false) {
+    for (const m of text.matchAll(/[\u4e00-\u9fff][,;:!?](?=[\u4e00-\u9fff]|$)|[，。！？；：]{2,}/g)) {
+      if (/^(……|！！|？？)$/.test(m[0])) continue;
+      add("punctuation", m, "请核对中文语境中的英文或连续标点。");
+    }
+  }
+  if (options.auditPlaceholder !== false) {
+    for (const m of text.matchAll(/lorem ipsum|待补充|待替换|占位文案|测试文案|\bXXX\b|\bTODO\b/gi))
+      add("placeholder", m, "可能是尚未替换的占位文案。");
+  }
+  if (options.auditOrphan !== false && node.textAutoResize !== "WIDTH_AND_HEIGHT") {
+    const tail = /([\u4e00-\u9fff])[，。！？；：、”’）】》]*\s*$/.exec(text);
+    if (tail && tail.index > 0) {
+      // 快速路径 1：手动换行后的末行单字直接判定，无需克隆图层测高
+      if (/\n\s*$/.test(text.slice(0, tail.index))) {
+        found.push(makeCopyIssue(node, "orphan-line", tail.index, text.length, "末行仅一个汉字（手动换行），请核对。"));
+        return found;
+      }
+      // 快速路径 2：单行容纳预检，避免单行文本进行无谓的节点克隆
+      const fontSize = typeof node.fontSize === "number" ? node.fontSize : 12;
+      if (node.width >= text.length * fontSize) {
+        return found;
+      }
+      let probe;
+      try {
+        await loadTextNodeFonts(node);
+        probe = node.clone();
+        // Leave auto-layout/instance sizing before measuring natural line height.
+        figma.currentPage.appendChild(probe);
+        const originalWidth = node.width;
+        probe.textAutoResize = "NONE";
+        probe.resize(originalWidth, Math.max(1, node.height));
+        probe.visible = false;
+        probe.textAutoResize = "HEIGHT";
+        const fullHeight = probe.height;
+        probe.deleteCharacters(tail.index, text.length);
+        const prefixHeight = probe.height;
+        const widthStable = Math.abs(probe.width - originalWidth) < 0.01;
+        // A single-character suffix must account for a complete visual line.
+        // Mixed line heights can change the box slightly without removing a line.
+        const removedLine = fullHeight - prefixHeight >= fontSize * 0.8;
+        if (widthStable && removedLine)
+          found.push(makeCopyIssue(node, "orphan-line", tail.index, text.length, "末行可能仅一个汉字，建议调整文本框宽度或文案。"));
+      } catch (error) {
+        // Unavailable fonts cannot be measured reliably.
+      } finally {
+        if (probe) {
+          try { probe.remove(); } catch (e) {}
+        }
+      }
+    }
+  }
+  return found;
 }
 
 function getIssueDifference(text, issue) {
@@ -644,7 +724,14 @@ async function getTextNodes(scope, options = scanOptions) {
       nodes.push(root);
     }
 
-    if ("findAll" in root) {
+    if ("findAllWithCriteria" in root) {
+      const candidates = root.findAllWithCriteria({ types: ["TEXT"] });
+      for (const node of candidates) {
+        if (shouldIncludeTextNode(node, options)) {
+          nodes.push(node);
+        }
+      }
+    } else if ("findAll" in root) {
       nodes.push.apply(nodes, root.findAll((node) => node.type === "TEXT" && shouldIncludeTextNode(node, options)));
     }
   }
@@ -736,6 +823,7 @@ function applyIssuesToText(text, issues) {
 }
 
 async function fixIssue(issue, options = scanOptions) {
+  if (issue.advisory) return { fixed: 0 };
   const node = await figma.getNodeByIdAsync(issue.nodeId);
   if (!node || node.type !== "TEXT") return { fixed: 0 };
   if (options.ignoreHidden && !isEffectivelyVisible(node)) {
@@ -795,7 +883,7 @@ async function fixTermFormatIssue(node, issue) {
       figma.notify("这条术语格式问题可能已经被修改，请重新检查");
       return { fixed: 0 };
     }
-    figma.notify("已按术语规则修复格式");
+    figma.notify("已按专有名词规范修复格式");
     return { fixed: 1 };
   } catch (error) {
     figma.notify(`无法修复「${node.name}」：字体未能加载或文本不可编辑`);

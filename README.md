@@ -4,7 +4,7 @@
   <p><strong>面向专业设计与文案团队的 Figma 文本排版与中英文空格校验插件</strong></p>
   <p>
     <a href="https://github.com/suleeeee/SpaceFixer"><img src="https://img.shields.io/badge/GitHub-SpaceFixer-black?logo=github" alt="GitHub" /></a>
-    <a href="https://www.figma.com/community"><img src="https://img.shields.io/badge/Figma%20Plugin%20ID-1648025602357999016-blue?logo=figma" alt="Figma Plugin" /></a>
+    <a href="https://www.figma.com/community/plugin/1648025602357999016/spacefixer"><img src="https://img.shields.io/badge/Figma%20Community-SpaceFixer-blue?logo=figma" alt="Figma Plugin" /></a>
     <img src="https://img.shields.io/badge/Version-v3.2.0-brightgreen" alt="Version" />
     <img src="https://img.shields.io/badge/License-MIT-orange" alt="License" />
   </p>
@@ -97,7 +97,7 @@ node checks/space-fixer-rule-check.js
 ## 🔗 相关链接
 
 - **GitHub 仓库**：[https://github.com/suleeeee/SpaceFixer](https://github.com/suleeeee/SpaceFixer)
-- **Figma 设计稿**：[SpaceFixer Design Tokens & UI](https://www.figma.com/design/pPEd025XGPCSLRRUAMPolJ)
+- **Figma 插件主页**：[SpaceFixer on Figma Community](https://www.figma.com/community/plugin/1648025602357999016/spacefixer)
 - **Plugin ID**：`1648025602357999016`
 
 ---

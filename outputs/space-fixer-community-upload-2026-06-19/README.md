@@ -69,4 +69,4 @@
 ## 资源与链接
 
 - GitHub 仓库：[https://github.com/suleeeee/SpaceFixer](https://github.com/suleeeee/SpaceFixer)
-- 设计文件：[SpaceFixer — UI Brand](https://www.figma.com/design/pPEd025XGPCSLRRUAMPolJ)
+- Figma 插件主页：[SpaceFixer on Figma Community](https://www.figma.com/community/plugin/1648025602357999016/spacefixer)
